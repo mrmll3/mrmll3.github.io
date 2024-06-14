@@ -1,8 +1,20 @@
-var canvas = document.querySelector('canvas');
+var canvas = document.getElementById('playCanvas');
+var playAreaDiv = document.getElementById('playArea');
+var body = document.querySelector('body');
+var header = document.getElementById('header')
+var button_fullscreen_toggle = document.getElementById('btn_fullscreen_toggle')
+var end_card = document.getElementById('end_card');
+var btn_restart = document.getElementById('btn_restart');
+var button_next_round = document.getElementById('btn_next_round');
+var end_card_message = document.getElementById('end_card_message');
+var lbl_timer = document.getElementById('timer');
+var lbl_bubbles_count = document.getElementById('bubbles_count');
+var btn_unicorn = document.getElementById('btn_unicorn');
+let state_of_unicorn = false;
 
 function resizeCanvas() {
-  canvas.width = window.innerWidth - 3;
-  canvas.height = window.innerHeight - 3;
+  canvas.width = window.innerWidth - 4;
+  canvas.height = window.innerHeight - header.clientHeight - Math.round((window.innerHeight - header.clientHeight) * 0.02);
 }
 resizeCanvas();
 
@@ -16,7 +28,7 @@ function getRandomColor() {
 var ctx = canvas.getContext('2d');
 var initAfterExec = false;
 const piTwo = Math.PI * 2;
-var noOfCircles = 9;
+var noOfCircles = 2;
 var mouseRange = 20;
 var mouse;
 var dampingFactor = 0.9995;
@@ -24,17 +36,7 @@ var maxRadius;
 var speedfactor = 6;
 var growthFactor = 5;
 var shrinkFactor = Math.ceil(growthFactor / 2);
-var colorArray = [
-  '#ffbd00',
-  '#ff5400',
-  '#ff0054',
-  '#9e0059',
-  '#390099',
-  '#FFFFFF',
-  '#3a86ff',
-  '#d90429'
-];
-
+var colorArray = ['#ffbd00', '#ff5400', '#ff0054', '#9e0059', '#390099', '#FFFFFF', '#3a86ff', '#d90429'];
 var circleArray = [];
 var timerStart;
 var clickCounter;
@@ -44,13 +46,17 @@ let speedy = 0.03;
 var currentHighscore = 0;
 
 //#region events
-
+button_fullscreen_toggle.addEventListener('click', toggleFullScreen);
+btn_restart.addEventListener('click', restart);
+button_next_round.addEventListener('click', next_round);
+btn_unicorn.addEventListener('click', draw_unicorns);
 window.addEventListener("touchstart", handleTouch);
 window.addEventListener("touchmove", handleTouch);
 window.addEventListener("touchend", handleTouchend);
 window.addEventListener('mousemove', handlemousemove);
 window.addEventListener('click', handleClick);
-window.addEventListener('keyup', handleKey);
+// window.addEventListener('doubleclick')
+// window.addEventListener('keyup', handleKey);
 window.addEventListener('resize',
   () => {
     resizeCanvas();
@@ -79,6 +85,7 @@ function Circle(x, y, dx, dy, radius, color, fill = true, strokeStyle = "black",
   this.draw = function () {
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.radius, 0, piTwo, false);
+    ctx.lineWidth = 4;
     ctx.strokeStyle = this.strokeStyle;
     ctx.fillStyle = this.color;
     if (this.fill === true) { ctx.fill(); }
@@ -108,19 +115,20 @@ function Circle(x, y, dx, dy, radius, color, fill = true, strokeStyle = "black",
     let originalX = this.x;
     let originalY = this.y;
     // move circle
-    this.x += this.dx;
-    this.y += this.dy;
+    this.x = (this.x + this.dx);
+    this.y = (this.y + this.dy);
 
     //interactivity 
-    if (mouse.x - this.x < mouseRange && mouse.x - this.x > -mouseRange &&
-      mouse.y - this.y < mouseRange && mouse.y - this.y > -mouseRange) {
-      if (this.radius < maxRadius) {
-        this.radius += growthFactor;
-      }
-    } else if (this.radius > this.minRadius) {
-      this.radius -= shrinkFactor;
-    }
-    if (this.radius < this.minRadius) { this.radius = this.minRadius; }
+    // cancelsed
+    // if (mouse.x - this.x < mouseRange && mouse.x - this.x > -mouseRange &&
+    //   mouse.y - this.y < mouseRange && mouse.y - this.y > -mouseRange) {
+    //   if (this.radius < maxRadius) {
+    //     this.radius += growthFactor;
+    //   }
+    // } else if (this.radius > this.minRadius) {
+    //   this.radius -= shrinkFactor;
+    // }
+    // if (this.radius < this.minRadius) { this.radius = this.minRadius; }
 
     // speeddamping over time
     this.dx *= dampingFactor;
@@ -155,7 +163,7 @@ function init() {
   timerStart = new Date();
   clickCounter = 0;
   maxRadius = Math.round((canvas.height + canvas.width) / 15);
-  hitRadius = Math.ceil(Math.min(canvas.height, canvas.width) / 15);
+  hitRadius = Math.ceil(Math.min(canvas.height, canvas.width) / 12);
   mouseRange = hitRadius * 2;
   mouse = { x: -mouseRange, y: -mouseRange }
   circleArray = [];
@@ -181,9 +189,16 @@ function animate() {
   for (var i = 0; i < circleArray.length; i++) {
     circleArray[i].update();
   }
-  let circle = new Circle(mouse.x, mouse.y, 0, 0, hitRadius, '#000000', false, 'white', true);
-  circle.update();
+  if (mouse.y > 0) {
+    let circle = new Circle(mouse.x, mouse.y, 0, 0, hitRadius, '#000000', false, 'white', true);
+    circle.update();
+  }
+  let timer = new Date(Date.now() - timerStart - 3600000);
+  lbl_timer.innerText = "Timer: " + timer.toLocaleTimeString();
+  if (state_of_unicorn) {
+    ctx.drawImage(img, 30, 30, 100, 100);
 
+  }
 }
 
 animate();
@@ -192,37 +207,40 @@ function handleClick(event) {
   clickCounter++;
   mouse.x = event.x;
   mouse.y = event.y;
+  correct_coordinates();
   checkHit();
-
 }
 
 function handleKey(event) {
-  event.preventDefault();
-  if (event.key === 'Enter') {
-    toggleFullScreen();
-  }
-  if (event.key === 'i') {
-    init();
-  }
+  // event.preventDefault();
+  // if (event.key === 'Enter') {
+  //   toggleFullScreen();
+  // }
+  // if (event.key === 'i') {
+  //   init();
+  // }
 }
 
 function handleTouch(e) {
-  // e.preventDefault();
+  e.preventDefault();
   let x, y;
   var touch = e.touches[0] || e.changedTouches[0];
   x = touch.pageX;
   y = touch.pageY;
   mouse.x = x;
   mouse.y = y;
+  correct_coordinates();
+
 }
 
 let lastTap = 0;
 function handleTouchend(e) {
-  e.preventDefault();
+  // e.preventDefault();
   const currentTime = new Date().getTime();
   if (currentTime - lastTap < 150) {
     // double tap detected
-    toggleFullScreen();
+    e.preventDefault();
+    e.stopPropagation();
   } else {
     lastTap = currentTime;
     // handle single tap event
@@ -234,6 +252,12 @@ function handleTouchend(e) {
 function handlemousemove(e) {
   mouse.x = e.x;
   mouse.y = e.y;
+  correct_coordinates();
+
+}
+
+function correct_coordinates() {
+  mouse.y = mouse.y - header.clientHeight;
 }
 
 function checkHit() {
@@ -282,13 +306,10 @@ function checkHit() {
         currentHighscore = points;
         msg += 'that\'s a new highscore';
       }
-      alert(msg);
-      levelUp();
-      initAfterExec = true;
-      init();
+      end_card_message.innerText = msg;
+      // end_card.style.display = 'block';
+      end_card.style = 'display: block;';
     } else if (initAfterExec) {
-      console.log('restart');
-      /* window.location.reload(); */
     }
   }
 }
@@ -301,4 +322,24 @@ function calcPoints(time, shots, bubbles) {
 
 function levelUp() {
   noOfCircles += Math.ceil(noOfCircles / 3);
+}
+
+function restart() {
+  console.log('restart');
+  window.location.reload();
+
+}
+
+function next_round() {
+  levelUp();
+  initAfterExec = true;
+  end_card.style.display = "none";
+  init();
+
+}
+const img = new Image();
+img.src = 'img/unicorn_on_fire.png';
+
+function draw_unicorns() {
+  state_of_unicorn = !state_of_unicorn;
 }
