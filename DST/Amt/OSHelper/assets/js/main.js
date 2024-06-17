@@ -78,11 +78,11 @@ function get_days_between() {
 }
 
 // Format a date as a string in the format YYYY-MM-DD
-function format_ISO_Date(date) {
+function format_ISO_Date(date, delimiter = "-") {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
+    return `${year}${delimiter}${month}${delimiter}${day}`;
 }
 
 function add_result() {
