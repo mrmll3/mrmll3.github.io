@@ -67,14 +67,14 @@ function isInside(x, y, cx, cy, r) {
   return distance < (r + hitRadius);
 }
 
-function Circle(x, y, dx, dy, radius, color, fill = true, strokeStyle = "black", stroke = false) {
+function Circle(x, y, dx, dy, radius, fillColor = "white", fill = true, strokeStyle = "black", stroke = false) {
   this.x = x;
   this.y = y;
   this.dx = dx;
   this.dy = dy;
   this.radius = radius;
   this.minRadius = radius;
-  this.color = color;
+  this.fillColor = fillColor;
   this.fill = fill;
   this.strokeStyle = strokeStyle;
   this.stroke = stroke;
@@ -84,7 +84,7 @@ function Circle(x, y, dx, dy, radius, color, fill = true, strokeStyle = "black",
     ctx.arc(this.x, this.y, this.radius, 0, piTwo, false);
     ctx.lineWidth = 4;
     ctx.strokeStyle = this.strokeStyle;
-    ctx.fillStyle = this.color;
+    ctx.fillStyle = this.fillColor;
     if (this.fill === true) { ctx.fill(); }
     if (this.stroke === true) { ctx.stroke(); }
   };
