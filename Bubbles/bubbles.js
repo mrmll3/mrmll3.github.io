@@ -9,8 +9,6 @@ var button_next_round = document.getElementById('btn_next_round');
 var end_card_message = document.getElementById('end_card_message');
 var lbl_timer = document.getElementById('timer');
 var lbl_bubbles_count = document.getElementById('bubbles_count');
-var btn_unicorn = document.getElementById('btn_unicorn');
-let state_of_unicorn = false;
 
 function resizeCanvas() {
   canvas.width = window.innerWidth - 4;
@@ -49,7 +47,6 @@ var currentHighscore = 0;
 button_fullscreen_toggle.addEventListener('click', toggleFullScreen);
 btn_restart.addEventListener('click', restart);
 button_next_round.addEventListener('click', next_round);
-btn_unicorn.addEventListener('click', draw_unicorns);
 window.addEventListener("touchstart", handleTouch);
 window.addEventListener("touchmove", handleTouch);
 window.addEventListener("touchend", handleTouchend);
@@ -195,10 +192,6 @@ function animate() {
   }
   let timer = new Date(Date.now() - timerStart - 3600000);
   lbl_timer.innerText = "Timer: " + timer.toLocaleTimeString();
-  if (state_of_unicorn) {
-    ctx.drawImage(img, 30, 30, 100, 100);
-
-  }
 }
 
 animate();
@@ -336,10 +329,4 @@ function next_round() {
   end_card.style.display = "none";
   init();
 
-}
-const img = new Image();
-img.src = 'img/unicorn_on_fire.png';
-
-function draw_unicorns() {
-  state_of_unicorn = !state_of_unicorn;
 }

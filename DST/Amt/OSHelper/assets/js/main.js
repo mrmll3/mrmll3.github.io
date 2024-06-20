@@ -100,7 +100,7 @@ function add_result() {
           <td>${days_between.weekdays_without_holidays}</td>
       `;
     if (form_incl_start.checked) {
-        newRow.innerHTML += "<td>&#9745;</td>";
+        newRow.innerHTML += "<td>&#9745;</td>"; // 
     }
     else {
         newRow.innerHTML += "<td>&#9744;</td>";
