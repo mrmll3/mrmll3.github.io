@@ -1,4 +1,6 @@
-import Tools from './tools-links.json'
+"use strict"
+let Tools;
+getTools();
 
 // sidenavigation
 export function toggleNav() {
@@ -14,8 +16,13 @@ export function initNav(navJSON, navDiv = "mySidenav") {
     Tools.forEach(tool => {
         nav.innerHTML += `<a href="${tool.Link}">${tool.Name}</a>`
     });
-    // let tools;
-    // fetch('./tools-links.json')
-    //     .then((response) => response.json())
-    //     .then((json) => tools = json.Tools);
+    let closeButton;
+    closeButton = document.getElementsByClassName("closebtn")[0];
+    closeButton.addEventListener("click", toggleNav);
+}
+
+function getTools() {
+    fetch('./tools-links.json')
+        .then((response) => response.json())
+        .then((json) => tools = json.Tools);
 }

@@ -1,4 +1,3 @@
-
 'use strict'
 import { toggleNav, initNav } from './navHelper.js';
 
