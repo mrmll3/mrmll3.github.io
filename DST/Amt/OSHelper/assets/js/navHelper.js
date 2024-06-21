@@ -11,7 +11,7 @@ export function toggleNav() {
     }
 }
 
-export function initNav(navJSON, navDiv = "mySidenav") {
+export function initNav(navDiv = "mySidenav") {
     const nav = document.getElementById(navDiv);
     Tools.forEach(tool => {
         nav.innerHTML += `<a href="${tool.Link}">${tool.Name}</a>`
@@ -25,7 +25,7 @@ export function initNav(navJSON, navDiv = "mySidenav") {
 }
 
 function getTools() {
-    fetch('./tools-links.json')
+    fetch('https://mrmll3.github.io/DST/Amt/OSHelper/.assets/js/tools-links.json')
         .then((response) => response.json())
         .then((json) => tools = json.Tools);
 }
