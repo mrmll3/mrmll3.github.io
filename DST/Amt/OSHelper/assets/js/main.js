@@ -32,6 +32,7 @@ function init() {
     form_end_date.value = format_ISO_Date(new Date());
     form_start_date.focus();
     form_incl_start.checked = true;
+    initNav();
 }
 
 
