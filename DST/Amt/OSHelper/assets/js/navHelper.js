@@ -8,3 +8,7 @@ function toggleNav() {
         document.getElementById("mySidenav").style.width = "0";
     }
 }
+
+function initNav(navJSON, navDiv) {
+
+}
