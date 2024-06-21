@@ -1,7 +1,4 @@
 "use strict"
-let Tools;
-getTools();
-
 
 // sidenavigation
 export function toggleNav() {
@@ -12,22 +9,28 @@ export function toggleNav() {
     }
 }
 
-export function initNav(navDiv = "mySidenav") {
+export async function initNav(navDiv = "mySidenav") {
     const nav = document.getElementById(navDiv);
-    getTools().then(
-        Tools.forEach(tool => {
-            nav.innerHTML += `<a href="${tool.Link}">${tool.Name}</a>`
-        });
-    let closeButton;
-    let menuButton;
-    menuButton = document.getElementById("openNav");
-    closeButton = document.getElementsByClassName("closebtn")[0];
-    closeButton.addEventListener("click", toggleNav);
-    menuButton.addEventListener("click", toggleNav);)
+    let Tools;
+    console.log(getTools());
+    Tools = getTools();
+    // getTools().then(() =>
+    //     Tools.forEach(tool => {
+    //         nav.innerHTML += `<a href="${tool.Link}">${tool.Name}</a>`
+    //     }));
+    Tools.forEach(tool => {
+        nav.innerHTML += `<a href="${tool.Link}">${tool.Name}</a>`
+    })
 }
 
-async function getTools() {
+function getTools() {
     fetch('https://mrmll3.github.io/DST/Amt/OSHelper/assets/js/tools-links.json')
         .then((response) => response.json())
-        .then((json) => tools = json.Tools);
+        .then((json) => {
+            let Tools;
+            Tools = json;
+            Tools = Tools.Tools;
+            return Tools;
+        });
+
 }
