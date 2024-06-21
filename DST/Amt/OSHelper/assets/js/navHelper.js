@@ -14,18 +14,19 @@ export function toggleNav() {
 
 export function initNav(navDiv = "mySidenav") {
     const nav = document.getElementById(navDiv);
-    Tools.forEach(tool => {
-        nav.innerHTML += `<a href="${tool.Link}">${tool.Name}</a>`
-    });
+    getTools().then(
+        Tools.forEach(tool => {
+            nav.innerHTML += `<a href="${tool.Link}">${tool.Name}</a>`
+        });
     let closeButton;
     let menuButton;
     menuButton = document.getElementById("openNav");
     closeButton = document.getElementsByClassName("closebtn")[0];
     closeButton.addEventListener("click", toggleNav);
-    menuButton.addEventListener("click", toggleNav);
+    menuButton.addEventListener("click", toggleNav);)
 }
 
-function getTools() {
+async function getTools() {
     fetch('https://mrmll3.github.io/DST/Amt/OSHelper/assets/js/tools-links.json')
         .then((response) => response.json())
         .then((json) => tools = json.Tools);
