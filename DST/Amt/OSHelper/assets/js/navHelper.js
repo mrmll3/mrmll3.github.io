@@ -26,7 +26,7 @@ export function initNav(navDiv = "mySidenav") {
 }
 
 function getTools() {
-    fetch('https://mrmll3.github.io/DST/Amt/OSHelper/.assets/js/tools-links.json')
+    fetch('https://mrmll3.github.io/DST/Amt/OSHelper/assets/js/tools-links.json')
         .then((response) => response.json())
         .then((json) => tools = json.Tools);
 }
