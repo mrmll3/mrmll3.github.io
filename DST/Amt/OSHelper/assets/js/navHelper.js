@@ -2,6 +2,7 @@
 let Tools;
 getTools();
 
+
 // sidenavigation
 export function toggleNav() {
     if (!(document.getElementById("mySidenav").style.width === "450px")) {
