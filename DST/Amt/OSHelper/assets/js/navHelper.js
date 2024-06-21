@@ -1,3 +1,4 @@
+import Tools from './tools-links.json' assert { type: 'json' }
 
 // sidenavigation
 
@@ -11,4 +12,8 @@ function toggleNav() {
 
 function initNav(navJSON, navDiv) {
 
+    // let tools;
+    // fetch('./tools-links.json')
+    //     .then((response) => response.json())
+    //     .then((json) => tools = json.Tools);
 }
