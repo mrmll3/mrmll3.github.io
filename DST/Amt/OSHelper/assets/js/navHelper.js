@@ -1,5 +1,5 @@
 
-import Tools from './tools-links.json' assert { type: 'json' }
+import Tools from './tools-links.json'
 
 // sidenavigation
 
