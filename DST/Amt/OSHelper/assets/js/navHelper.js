@@ -17,8 +17,11 @@ export function initNav(navJSON, navDiv = "mySidenav") {
         nav.innerHTML += `<a href="${tool.Link}">${tool.Name}</a>`
     });
     let closeButton;
+    let menuButton;
+    menuButton = document.getElementById("openNav");
     closeButton = document.getElementsByClassName("closebtn")[0];
     closeButton.addEventListener("click", toggleNav);
+    menuButton.addEventListener("click", toggleNav);
 }
 
 function getTools() {
