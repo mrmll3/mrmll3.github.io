@@ -1,5 +1,5 @@
 
-import './navHelper.js';
+import { toggleNav, initNav } from './navHelper.js';
 
 // global declarations
 const excludeDays = [0, 6]; //sunday & monday
