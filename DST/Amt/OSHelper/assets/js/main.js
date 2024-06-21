@@ -1,3 +1,6 @@
+
+import './navHelper.js';
+
 // global declarations
 const excludeDays = [0, 6]; //sunday & monday
 var excludeHolidays = [];

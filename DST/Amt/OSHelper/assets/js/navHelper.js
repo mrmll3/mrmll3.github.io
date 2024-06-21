@@ -1,3 +1,4 @@
+
 import Tools from './tools-links.json' assert { type: 'json' }
 
 // sidenavigation
@@ -10,10 +11,16 @@ function toggleNav() {
     }
 }
 
-function initNav(navJSON, navDiv) {
-
+function initNav(navJSON, navDiv = "mySidenav") {
+    const nav = document.getElementById(navDiv)
+    Tools.forEach(tool => {
+        nav.innerHTML += `<a href="${tool.Link}">${tool.Name}</a>`
+    });
     // let tools;
     // fetch('./tools-links.json')
     //     .then((response) => response.json())
     //     .then((json) => tools = json.Tools);
 }
+
+
+export { initNav, toggleNav }
