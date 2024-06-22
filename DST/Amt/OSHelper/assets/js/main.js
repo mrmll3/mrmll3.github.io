@@ -9,11 +9,6 @@ const form_start_date = document.getElementById("start-date");
 const form_end_date = document.getElementById("end-date");
 const form_incl_start = document.getElementById('include-start');
 const results_table = document.getElementById('results-table');
-const closeButton = document.getElementsByClassName("closebtn")[0];
-const menuButton = document.getElementById("openNav");;
-
-closeButton.addEventListener("click", toggleNav);
-menuButton.addEventListener("click", toggleNav);
 
 
 // Get the two dates from the user
