@@ -11,9 +11,11 @@ const menuButton = document.getElementById("menubtn");
 export function toggleNav(onOrOff) {
     if (onOrOff) {
         sideNav.style.width = "450px";
+        sideNav.style.left = 0;
         sideNav.style.opacity = "1";
     } else {
-        sideNav.style.width = "15px";
+        sideNav.style.width = "450px";
+        sideNav.style.left = (Number(sideNav.style.width.split("px")[0]) * -1) + 15 + "px";
         sideNav.style.opacity = "0.5";
     }
 }
@@ -39,6 +41,6 @@ export async function initNav(navDiv = "mySidenav") {
 }
 
 function checkMenuRange(e) {
-    if (e.clientX <= Number(sideNav.style.width.split("px")[0]) + 15) { toggleNav(status.on); };
+    if (e.clientX <= 15) { toggleNav(status.on); };
     if (e.clientX >= Number(sideNav.style.width.split("px")[0]) + 15) { toggleNav(status.off) };
 }
