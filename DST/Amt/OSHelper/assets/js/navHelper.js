@@ -6,11 +6,10 @@ const status = {
     off: false
 }
 
-let sideNav = document.getElementById("mySidenav");
+let sideNav;
 
 try {
-    sideNav == "undefined";
-
+    sideNav == document.getElementById("mySidenav");
 } catch (error) {
     let body = document.body;
     let newNav = document.createElement("div");
