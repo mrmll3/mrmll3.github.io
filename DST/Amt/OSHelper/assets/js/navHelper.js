@@ -7,14 +7,13 @@ const status = {
 }
 
 let sideNav;
-if (document.getElementById("mySidenav") == "null") {
+if (document.getElementById("mySidenav") == null) {
     let body = document.body;
     let newNav = document.createElement("div");
     newNav.className = "sidenav";
     newNav.id = "mySidenav";
     body.appendChild(newNav);
     sideNav = document.getElementById("mySidenav");
-    console.log(error);
 }
 else sideNav = document.getElementById("mySidenav");
 
