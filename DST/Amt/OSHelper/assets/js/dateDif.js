@@ -43,10 +43,10 @@ window.onload = (event) => {
   formDateDif.addEventListener('submit', (event) => {
     event.preventDefault(); // Prevent the form from submitting normally
     calculateNewDate();
-    initNav();
 
   });
   console.log("reload");
   dateInput.value = new Date().toISOString().split("T")[0];
   dateInput.focus();
+  initNav();
 }
