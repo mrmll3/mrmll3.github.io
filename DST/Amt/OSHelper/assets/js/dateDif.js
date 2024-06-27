@@ -1,3 +1,8 @@
+'use strict'
+
+import { toggleNav, initNav } from './navHelper.js';
+
+
 // Define constants for DOM elements
 const formDateDif = document.getElementById("formDateDif");
 const dateInput = document.querySelector("#date");
@@ -38,7 +43,9 @@ window.onload = (event) => {
   formDateDif.addEventListener('submit', (event) => {
     event.preventDefault(); // Prevent the form from submitting normally
     calculateNewDate();
-});
+    initNav();
+
+  });
   console.log("reload");
   dateInput.value = new Date().toISOString().split("T")[0];
   dateInput.focus();

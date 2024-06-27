@@ -5,8 +5,22 @@ const status = {
     on: true,
     off: false
 }
-const sideNav = document.getElementById("mySidenav");
-const menuButton = document.getElementById("menubtn");
+
+let sideNav = document.getElementById("mySidenav");
+
+try {
+    sideNav == "undefined";
+
+} catch (error) {
+    let body = document.body;
+    let newNav = document.createElement("div");
+    newNav.className = "sidenav";
+    newNav.id = "mySidenav";
+    body.appendChild(newNav);
+    sideNav = document.getElementById("mySidenav");
+    console.log(error);
+}
+// const menuButton = document.getElementById("menubtn");
 
 export function toggleNav(onOrOff) {
     if (onOrOff) {
