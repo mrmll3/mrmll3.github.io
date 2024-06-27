@@ -9,7 +9,7 @@ const status = {
 let sideNav;
 
 try {
-    sideNav == document.getElementById("mySidenav");
+    sideNav = document.getElementById("mySidenav");
 } catch (error) {
     let body = document.body;
     let newNav = document.createElement("div");
