@@ -7,10 +7,7 @@ const status = {
 }
 
 let sideNav;
-
-try {
-    sideNav = document.getElementById("mySidenav");
-} catch (error) {
+if (document.getElementById("mySidenav") == "null") {
     let body = document.body;
     let newNav = document.createElement("div");
     newNav.className = "sidenav";
@@ -19,6 +16,8 @@ try {
     sideNav = document.getElementById("mySidenav");
     console.log(error);
 }
+else sideNav = document.getElementById("mySidenav");
+
 // const menuButton = document.getElementById("menubtn");
 
 export function toggleNav(onOrOff) {
