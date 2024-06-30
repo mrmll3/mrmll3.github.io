@@ -10,7 +10,8 @@ let sideNav;
 let sideNavWidth = () => Number(sideNav.style.width.split("px")[0]);
 // const menuButton = document.getElementById("menubtn");
 
-export function toggleNav(onOrOff) {
+// export 
+function toggleNav(onOrOff) {
     if (onOrOff) {
         sideNav.style.width = "450px";
         sideNav.style.left = 0;
@@ -27,6 +28,7 @@ export async function initNav(navDiv = "mySidenav") {
     loadCSS();
     await addNavElements(sideNav);
     toggleNav(status.off);
+    // intro animation
     setTimeout(() => {
         sideNav.style.left = (sideNavWidth() * -1) + 20 + "px";
         sideNav.style.opacity = "1";
@@ -52,15 +54,15 @@ function addNav() {
 }
 
 async function addNavElements(navDiv) {
-    let Tools = await fetch("https://mrmll3.github.io/DST/Amt/OSHelper/assets/js/tools-links.json");
+    let Tools = await fetch("./assets/js/tools-links.json");
     Tools = await Tools.json();
     Tools = await Tools.Tools;
     // add links to sideNav
     Tools.forEach(tool => {
         let linkElement = document.createElement("a");
         linkElement.className = "sidenav-link";
-        linkElement.href = tool.link;
-        linkElement.text = tool.Name;
+        linkElement.href = tool.Link;
+        linkElement.innerText = tool.Name;
         navDiv.appendChild(linkElement);;
     });
 }
