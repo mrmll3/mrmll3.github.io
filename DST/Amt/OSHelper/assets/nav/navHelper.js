@@ -7,8 +7,9 @@ const status = {
 }
 
 let sideNav;
-let sideNavWidth = () => Number(sideNav.style.width.split("px")[0]);
 let openMenuButton;
+// dynamically give sidenavigation width
+let sideNavWidth = () => Number(sideNav.style.width.split("px")[0]);
 
 // export 
 function toggleNav(onOrOff) {
@@ -59,7 +60,6 @@ async function addNav() {
     if (document.getElementById("openNav") == null) {
         let subheader = document.getElementById("subheader");
         let newNav = document.createElement("button");
-        // newNav.className = "openNav";
         newNav.id = "openNav";
         newNav.innerText = "\u{2630} Menü"
         subheader.appendChild(newNav);
@@ -77,7 +77,7 @@ async function addNavElements(navDiv) {
     let closeButton = document.createElement("button");
     closeButton.className = "menubutton";
     closeButton.addEventListener("click", (e) => toggleNav(status.off));
-    closeButton.innerText = "schließen";
+    closeButton.innerText = "\u{2573}";
     navDiv.appendChild(closeButton);
     // add links to sideNav
     Tools.forEach(tool => {
