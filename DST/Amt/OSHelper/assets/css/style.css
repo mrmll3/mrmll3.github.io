@@ -73,14 +73,14 @@ body {
   border-bottom: 2px solid rgb(199, 199, 199);
 }
 
-#form {
+form {
   padding: 0.5rem 0;
   margin: 0.5rem 0;
   position: relative;
   flex-wrap: wrap;
 }
 
-#form form {
+form form {
   align-items: center;
   align-content: center;
   justify-content: center;
@@ -89,12 +89,12 @@ body {
   gap: 0.3rem;
 }
 
-#form br {
+form br {
   width: 15px;
   content: "";
 }
 
-#form button {
+form button {
   border: none;
   border: 2px solid rgb(255, 0, 26);
   background-color: rgb(255, 0, 26);
@@ -106,21 +106,21 @@ body {
   border-radius: 7px;
 }
 
-#form button:hover {
+form button:hover {
   background-color: rgb(255, 0, 26);
   color: rgb(255, 255, 255);
 }
 
-#form input {
+form input {
   border: 2px solid black;
   text-align: center;
   padding: 6px 15px;
   border-radius: 10px;
 }
 
-#form label,
-#form input {
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
+form label,
+form input {
+  /* font-family: Verdana, Geneva, Tahoma, sans-serif; */
   font-size: large;
   font-weight: 500;
 }

@@ -57,6 +57,11 @@ async function addNavElements(navDiv) {
     let Tools = await fetch("./assets/js/tools-links.json");
     Tools = await Tools.json();
     Tools = await Tools.Tools;
+    let closeButton = document.createElement("button");
+    closeButton.className = "menubutton";
+    closeButton.addEventListener("click", (e) => toggleNav(status.off));
+    closeButton.innerText = "schließen";
+    navDiv.appendChild(closeButton);
     // add links to sideNav
     Tools.forEach(tool => {
         let linkElement = document.createElement("a");
