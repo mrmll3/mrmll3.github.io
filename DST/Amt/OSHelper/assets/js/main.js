@@ -1,5 +1,5 @@
 'use strict'
-import { initNav } from './navHelper.js';
+import { initNav } from '../nav/navHelper.js';
 
 // global declarations
 const excludeDays = [0, 6]; //sunday & monday

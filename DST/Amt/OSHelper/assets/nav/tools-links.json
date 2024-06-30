@@ -1,0 +1,28 @@
+{
+    "Tools": [
+        {
+            "Name": "Tage zwischen Daten",
+            "Link": "./Tage.html"
+        },
+        {
+            "Name": "Fristenrechner",
+            "Link": "./Fristen.html"
+        },
+        {
+            "Name": "Mutterschutz",
+            "Link": "#"
+        },
+        {
+            "Name": "BAB Fristen",
+            "Link": "#"
+        },
+        {
+            "Name": "BAB - Anspruch",
+            "Link": "#"
+        },
+        {
+            "Name": "imp",
+            "Link": "#"
+        }
+    ]
+}

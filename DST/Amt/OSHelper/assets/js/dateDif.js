@@ -1,6 +1,6 @@
 'use strict'
 
-import { initNav } from './navHelper.js';
+import { initNav } from '../nav/navHelper.js';
 
 
 // Define constants for DOM elements
