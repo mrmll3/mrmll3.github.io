@@ -7,16 +7,7 @@ const status = {
 }
 
 let sideNav;
-if (document.getElementById("mySidenav") == null) {
-    let body = document.body;
-    let newNav = document.createElement("div");
-    newNav.className = "sidenav";
-    newNav.id = "mySidenav";
-    body.appendChild(newNav);
-    sideNav = document.getElementById("mySidenav");
-}
-else sideNav = document.getElementById("mySidenav");
-
+let sideNavWidth = () => Number(sideNav.style.width.split("px")[0]);
 // const menuButton = document.getElementById("menubtn");
 
 export function toggleNav(onOrOff) {
@@ -26,32 +17,65 @@ export function toggleNav(onOrOff) {
         sideNav.style.opacity = "1";
     } else {
         sideNav.style.width = "450px";
-        sideNav.style.left = (Number(sideNav.style.width.split("px")[0]) * -1) + 15 + "px";
+        sideNav.style.left = (sideNavWidth() * -1) + 15 + "px";
         sideNav.style.opacity = "0.33";
     }
 }
 
 export async function initNav(navDiv = "mySidenav") {
-    const nav = document.getElementById(navDiv);
-    let Tools = await fetch('https://mrmll3.github.io/DST/Amt/OSHelper/assets/js/tools-links.json');
-    Tools = await Tools.json();
-    Tools = await Tools.Tools;
-    Tools.forEach(tool => {
-        nav.innerHTML += `<a href="${tool.Link}">${tool.Name}</a>`
-    })
+    addNav();
+    loadCSS();
+    await addNavElements(sideNav);
     toggleNav(status.off);
-    window.addEventListener("mousemove", checkMenuRange);
     setTimeout(() => {
-        sideNav.style.left = "25px";
+        sideNav.style.left = (sideNavWidth() * -1) + 20 + "px";
         sideNav.style.opacity = "1";
         setTimeout(() => {
-            sideNav.style.left = "15px";
+            sideNav.style.left = (sideNavWidth() * -1) + 15 + "px";
             sideNav.style.opacity = "0.33";
         }, 100)
     }, 200)
+    window.addEventListener("mousemove", checkMenuRange);
+}
+
+function addNav() {
+    if (document.getElementById("mySidenav") == null) {
+        let body = document.body;
+        let newNav = document.createElement("div");
+        newNav.className = "sidenav";
+        newNav.id = "mySidenav";
+        body.appendChild(newNav);
+        sideNav = document.getElementById("mySidenav");
+    }
+    else sideNav = document.getElementById("mySidenav");
+
+}
+
+async function addNavElements(navDiv) {
+    let Tools = await fetch("https://mrmll3.github.io/DST/Amt/OSHelper/assets/js/tools-links.json");
+    Tools = await Tools.json();
+    Tools = await Tools.Tools;
+    // add links to sideNav
+    Tools.forEach(tool => {
+        let linkElement = document.createElement("a");
+        linkElement.className = "sidenav-link";
+        linkElement.href = tool.link;
+        linkElement.text = tool.Name;
+        navDiv.appendChild(linkElement);;
+    });
+}
+
+function loadCSS() {
+    // dynamically load sidenav.css
+    let head = document.getElementsByTagName("HEAD")[0];
+    let link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.type = "text/css";
+    link.href = "./assets/css/sidenav.css";
+    head.appendChild(link);
 }
 
 function checkMenuRange(e) {
     if (e.clientX <= 15) { toggleNav(status.on); };
-    if (e.clientX >= Number(sideNav.style.width.split("px")[0]) + 15) { toggleNav(status.off) };
+    if (e.clientX >= sideNavWidth() + 15) { toggleNav(status.off) };
 }
