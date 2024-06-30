@@ -16,10 +16,14 @@ function toggleNav(onOrOff) {
         sideNav.style.width = "450px";
         sideNav.style.left = 0;
         sideNav.style.opacity = "1";
+        openMenuButton.addEventListener("click", () => toggleNav(status.off));
+
     } else {
         sideNav.style.width = "450px";
         sideNav.style.left = (sideNavWidth() * -1) + 15 + "px";
         sideNav.style.opacity = "0.33";
+        openMenuButton.addEventListener("click", () => toggleNav(status.on));
+
     }
 }
 
@@ -53,10 +57,11 @@ async function addNav() {
     else sideNav = document.getElementById("openNav");
 
     if (document.getElementById("openNav") == null) {
-        let subheader = body.getElementById("subheader");
+        let subheader = document.getElementById("subheader");
         let newNav = document.createElement("button");
         // newNav.className = "openNav";
         newNav.id = "openNav";
+        newNav.innerText = "\u{2630} Menü"
         subheader.appendChild(newNav);
         openMenuButton = document.getElementById("openNav");
     }
@@ -96,5 +101,5 @@ function loadCSS() {
 
 function checkMenuRange(e) {
     if (e.clientX <= 15) { toggleNav(status.on); };
-    if (e.clientX >= sideNavWidth() + 15) { toggleNav(status.off) };
+    // if (e.clientX >= sideNavWidth() + 15) { toggleNav(status.off) };
 }
