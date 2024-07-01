@@ -7,8 +7,9 @@
     left: 0;
     background-color: #111;
     overflow-x: hidden;
-    transition: 0.3s cubic-bezier(0.6, -0.28, 0.74, 0.05);
+    transition: 0.5s cubic-bezier(0.47,-0.55, 0.99, 0.2);
     padding-top: 60px;
+    border-radius: 15px;
 }
 
 .sidenav a,
@@ -22,7 +23,7 @@ h1 {
     transition: 0.1s;
 }
 
-.sidenav a:hover {
+.sidenav a:hover, a:focus {
     color: #f1f1f1;
 }
 
