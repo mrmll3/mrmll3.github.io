@@ -21,7 +21,7 @@ function toggleNav(onOrOff) {
 
     } else {
         sideNav.style.width = "450px";
-        sideNav.style.left = (sideNavWidth() * -1) + 15 + "px";
+        sideNav.style.left = (sideNavWidth() * -1) + 10 + "px";
         sideNav.style.opacity = "0.33";
         openMenuButton.addEventListener("click", () => toggleNav(status.on));
 
@@ -38,7 +38,7 @@ export async function initNav(navDiv = "mySidenav") {
         sideNav.style.left = (sideNavWidth() * -1) + 20 + "px";
         sideNav.style.opacity = "1";
         setTimeout(() => {
-            sideNav.style.left = (sideNavWidth() * -1) + 15 + "px";
+            sideNav.style.left = (sideNavWidth() * -1) + 10 + "px";
             sideNav.style.opacity = "0.33";
         }, 100)
     }, 200)
