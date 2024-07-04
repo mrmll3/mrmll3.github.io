@@ -1,55 +1,31 @@
 "use strict"
 
 // sidenavigation
-const status = {
-    on: true,
-    off: false
-}
-
 let sideNav;
 let openMenuButton;
-// dynamically give sidenavigation width
-// let sideNavWidth = () => Number(sideNav.style.width.split("px")[0]);
 
-// export 
-function toggleNav(onOrOff) {
-    if (onOrOff) {
-        sideNav.style.width = "450px";
-        sideNav.style.left = 0;
-        sideNav.style.top = 0;
-        sideNav.style.opacity = "1";
-        openMenuButton.addEventListener("click", () => toggleNav(status.off));
-
-    } else {
-        sideNav.style.width = "450px";
-        sideNav.style.left = (sideNav.clientWidth * -1) + "px";
-        sideNav.style.top = (sideNav.clientHeight * -1) + "px";
-        sideNav.style.opacity = "0.33";
-        openMenuButton.addEventListener("click", () => toggleNav(status.on));
-
-    }
+function toggleNav() {
+    sideNav.classList.toggle("is-active");    
 }
+
 
 export async function initNav(navDiv = "mySidenav") {
     await addNav();
     loadCSS();
-    await addNavElements(sideNav);
-    toggleNav(status.off);
-    setTimeout(() => {
-        sideNav.style.top = (sideNav.ClientHeight * -1) + "px";
-        sideNav.style.calc = (sideNav.clientWidth * -1) + "px";
-    }, 2);
+    await addNavElements(sideNav);    
+    // setTimeout(() => {
+    //     sideNav.style.top = (sideNav.ClientHeight * -1) + "px";
+    //     sideNav.style.calc = (sideNav.clientWidth * -1) + "px";
+    // }, 2);
 
-    window.addEventListener("mousemove", checkMenuRange);
-    openMenuButton.addEventListener("click", () => toggleNav(status.on));
-  
-    
+    // window.addEventListener("mousemove", checkMenuRange);
+    openMenuButton.addEventListener("click", () => toggleNav());    
 }
 
 async function addNav() {
     let body = document.body;
     if (document.getElementById("mySidenav") == null) {
-        let newNav = document.createElement("div");
+        let newNav = document.createElement("nav");
         newNav.className = "sidenav";
         newNav.id = "mySidenav";
         body.appendChild(newNav);
@@ -66,7 +42,6 @@ async function addNav() {
         openMenuButton = document.getElementById("openNav");
     }
     else openMenuButton = document.getElementById("openNav");
-
 }
 
 async function addNavElements(navDiv) {
@@ -76,7 +51,7 @@ async function addNavElements(navDiv) {
     // add button to close sidenav
     let closeButton = document.createElement("button");
     closeButton.className = "menubutton";
-    closeButton.addEventListener("click", (e) => toggleNav(status.off));
+    closeButton.addEventListener("click", (e) => toggleNav());
     closeButton.innerText = "\u{2573}";
     navDiv.appendChild(closeButton);
     // add links to sideNav
@@ -100,6 +75,6 @@ function loadCSS() {
 }
 
 function checkMenuRange(e) {
-    if (e.clientX <= 15) { toggleNav(status.on); };
+    // if (e.clientX <= 15) { toggleNav(status.on); };
     // if (e.clientX >= sideNavWidth() + 15) { toggleNav(status.off) };
 }
