@@ -12,13 +12,7 @@ function toggleNav() {
 export async function initNav(navDiv = "mySidenav") {
     await addNav();
     loadCSS();
-    await addNavElements(sideNav);    
-    // setTimeout(() => {
-    //     sideNav.style.top = (sideNav.ClientHeight * -1) + "px";
-    //     sideNav.style.calc = (sideNav.clientWidth * -1) + "px";
-    // }, 2);
-
-    // window.addEventListener("mousemove", checkMenuRange);
+    await addNavElements(sideNav);
     openMenuButton.addEventListener("click", () => toggleNav());    
 }
 
@@ -60,7 +54,7 @@ async function addNavElements(navDiv) {
         linkElement.className = "sidenav-link";
         linkElement.href = tool.Link;
         linkElement.innerText = tool.Name;
-        navDiv.appendChild(linkElement);;
+        navDiv.appendChild(linkElement);
     });
 }
 
