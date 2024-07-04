@@ -38,6 +38,7 @@ a:focus {
     box-shadow:
         0 .6px 1.8px rgba(2, 14, 37, .1),
         0 3.2px 7.2px rgba(2, 14, 37, .16);
+    transition: 0.15s ease-in-out;
 }
 
 a.sidenav-link:hover::before {
