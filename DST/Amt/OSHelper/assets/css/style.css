@@ -74,6 +74,9 @@ body {
 }
 
 form {
+  display: flex;
+  align-items: center;
+  gap: 2px;
   padding: 0.5rem 0;
   margin: 0.5rem 0;
   position: relative;
