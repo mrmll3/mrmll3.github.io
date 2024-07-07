@@ -24,27 +24,32 @@
         <div id="toolbox-container">
             <h2>Fristenrechner</h2>
             <form id="formDateDif">
-                <label for="date">Datum:</label>
-                <input type="date" id="date" name="date"><br>
-
-                <label for="months">Kalendermonate:</label>
-                <input type="number" id="months" name="months" value="0"><br>
-
-                <label for="years">Jahre:</label>
-                <input type="number" id="years" name="years" value="0"><br>
-
-                <label for="weeks">Wochen:</label>
-                <input type="number" id="weeks" name="weeks" value="0"><br>
-
-                <label for="days">Tage:</label>
-                <input type="number" id="days" name="days" value="0"><br>
-
+                <div>
+                    <label for="date">Datum:</label>
+                    <input type="date" id="date" name="date">
+                </div><br>
+                <div>
+                    <label for="months">Kalendermonate:</label>
+                    <input type="number" id="months" name="months" value="0">
+                </div><br>
+                <div>
+                    <label for="years">Jahre:</label>
+                    <input type="number" id="years" name="years" value="0">
+                </div><br>
+                <div>
+                    <label for="weeks">Wochen:</label>
+                    <input type="number" id="weeks" name="weeks" value="0">
+                </div><br>
+                <div>
+                    <label for="days">Tage:</label>
+                    <input type="number" id="days" name="days" value="0">
+                </div><br>
                 <button type="submit" id="calulate-button">Berechnen</button>
             </form>
             <p id="result"></p>
         </div>
     </div>
 </body>
-<script type="module" src="./assets/js/dateDif.js"></script>
+<script type="module" src="./assets/js/Fristen.js"></script>
 
 </html>
