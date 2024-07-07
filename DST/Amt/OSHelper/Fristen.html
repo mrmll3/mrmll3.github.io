@@ -24,26 +24,26 @@
         <div id="toolbox-container">
             <h2>Fristenrechner</h2>
             <form id="formDateDif">
-                <div>
-                    <label for="date">Datum:</label>
+                <label for="date">
                     <input type="date" id="date" name="date">
-                </div><br>
-                <div>
-                    <label for="months">Kalendermonate:</label>
+                    <span class="input_label">Datum</span>
+                </label>
+                <label for="months">
                     <input type="number" id="months" name="months" value="0">
-                </div><br>
-                <div>
-                    <label for="years">Jahre:</label>
+                    <span class="input_label">Kalendermonate</span>
+                </label>
+                <label for="years">
                     <input type="number" id="years" name="years" value="0">
-                </div><br>
-                <div>
-                    <label for="weeks">Wochen:</label>
+                    <span class="input_label">Jahre</span>
+                </label>
+                <label for="weeks">
                     <input type="number" id="weeks" name="weeks" value="0">
-                </div><br>
-                <div>
-                    <label for="days">Tage:</label>
+                    <span class="input_label">Wochen</span>
+                </label>
+                <label for="days">
                     <input type="number" id="days" name="days" value="0">
-                </div><br>
+                    <span class="input_label">Tage</span>
+                </label>
                 <button type="submit" id="calulate-button">Berechnen</button>
             </form>
             <p id="result"></p>

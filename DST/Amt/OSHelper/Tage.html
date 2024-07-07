@@ -26,23 +26,22 @@
             <h2>Tage zwischen Daten</h2>
             <div id="form">
                 <form id="date-form">
-                    <div>
-                        <label for="start-date">von:</label>
+                    <label for="start-date">
                         <input type="date" id="start-date" name="start-date">
-                    </div>
-                    <br>
-                    <div>
-                        <label for="end-date">bis:</label>
+                        <span class="input_label">von</span>
+
+                    </label>
+                    <label for="end-date">
                         <input type="date" id="end-date" name="end-date">
-                    </div>
-                    <br>
-                    <div>
-                        <button type="submit">Berechnen</button>
-                        (
+                        <span class="input_label">bis</span>
+                    </label>
+
+                    <button type="submit">Berechnen</button>
+                    <label for="include-start" style="border: none;">(
                         <input type="checkbox" name="include-start" id="include-start">
-                        <label for="include-start"> inkl. Starttag </label>
-                        )
-                    </div>
+                        inkl. Starttag )
+                    </label>
+
                 </form>
             </div>
             <table id="results-table">

@@ -2,6 +2,7 @@
   --ba_red: rgb(255, 0, 26);
   --ba_gray: rgb(199, 199, 199);
   --ba_white: rgb(255, 255, 255);
+  --ba_warning: rgba(255, 0, 26, 0.3);
 }
 
 * * {
@@ -51,10 +52,9 @@ body {
 
 #subheader {
   display: flex;
-  align-items: flex-end;
-  justify-content: flex-end;
+  align-items: flex-start;
+  justify-content: flex-start;
 }
-
 
 #toolbox-container {
   display: flex;
@@ -72,56 +72,59 @@ body {
 form {
   display: flex;
   align-items: center;
-  gap: 2px;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: left;
+  gap: 0.3rem;
   padding: 0.5rem 0;
   margin: 0.5rem 0;
   position: relative;
-  flex-wrap: wrap;
 }
 
-form form {
-  align-items: center;
-  align-content: center;
-  justify-content: center;
-  display: flex;
-  gap: 0.3rem;
+form label {
+  position: relative;
+  border: 2px solid var(--ba_gray);
+  border-radius: 10px;
+  font-size: large;
+  font-weight: 500;
 }
 
-form br {
-  width: 15px;
-  content: "";
+span.input_label {
+  position: absolute;
+  top: -7px;
+  left: 5px;
+  font-size: 0.8rem;
+  background-color: var(--ba_white);
+  padding: 0 0.25rem;
 }
 
 form button {
   border: none;
-  border: 2px solid var(--ba_red);
   background-color: var(--ba_red);
   color: var(--ba_white);
   text-transform: uppercase;
   font-weight: 500;
   font-size: large;
   padding: 8px 15px;
+  margin-left: 10px;
   border-radius: 7px;
   cursor: pointer;
 }
 
-
 form input {
-  border: 2px solid black;
+  border: none;
+  background-color: transparent;
   text-align: center;
   padding: 6px 15px;
-  border-radius: 10px;
-}
-
-form label,
-form input {
   font-size: large;
   font-weight: 500;
 }
 
-form input[type=number] {
-  width: 5rem;
+form input:focus {
+  border: none;
+  outline-offset: none;
 }
+
 
 table {
   border-collapse: collapse;
