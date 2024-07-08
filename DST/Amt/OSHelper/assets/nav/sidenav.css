@@ -11,10 +11,14 @@
     padding: 0;
     cursor: pointer;
     text-align: right;
+    border-radius: 5px;
+    position: absolute;
+    top: -20px;
+    
 }
 
 #openNav:hover {
-    background-color: rgb(199, 199, 199);
+    background-color: rgba(2, 14, 37, 0.08);
 }
 
 
