@@ -8,20 +8,16 @@ function toggleNav() {
     sideNav.classList.toggle("is-active");
 }
 
-
-
 export async function initNav(navDiv = "mySidenav") {
     await addNav();
     loadCSS();
     await addNavElements(sideNav);
-    openMenuButton.addEventListener("click", (event) => {
-        event.preventDefault();
-        toggleNav();
+    openMenuButton.addEventListener("click", () => { toggleNav(); });
+    window.addEventListener("click", (event) => {
+        if (sideNav.classList.contains("is-active") &&
+            (event.target.id != "openNav") &&
+            isClickInMenu(event)) toggleNav();
     });
-    // window.addEventListener("click", (event) =>{
-    //     if (sideNav.classList.contains("is-active") && isClickInMenu(event)) toggleNav();}
-    // );
-
 }
 
 async function addNav() {
@@ -77,7 +73,5 @@ function loadCSS() {
 }
 
 function isClickInMenu(event) {
-
-    console.log(Number(event.clientX), Number(sideNav.clientWidth), Number(getComputedStyle(sideNav).left.split("px")[0]));
     return Number(event.clientX) > (Number(sideNav.clientWidth) + Number(getComputedStyle(sideNav).left.split("px")[0]));
 }
