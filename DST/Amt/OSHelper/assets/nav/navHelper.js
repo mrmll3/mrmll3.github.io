@@ -5,15 +5,23 @@ let sideNav;
 let openMenuButton;
 
 function toggleNav() {
-    sideNav.classList.toggle("is-active");    
+    sideNav.classList.toggle("is-active");
 }
+
 
 
 export async function initNav(navDiv = "mySidenav") {
     await addNav();
     loadCSS();
     await addNavElements(sideNav);
-    openMenuButton.addEventListener("click", () => toggleNav());    
+    openMenuButton.addEventListener("click", (event) => {
+        event.preventDefault();
+        toggleNav();
+    });
+    // window.addEventListener("click", (event) =>{
+    //     if (sideNav.classList.contains("is-active") && isClickInMenu(event)) toggleNav();}
+    // );
+
 }
 
 async function addNav() {
@@ -25,7 +33,7 @@ async function addNav() {
         body.appendChild(newNav);
         sideNav = document.getElementById("mySidenav");
     }
-    else sideNav = document.getElementById("openNav");
+    else sideNav = document.getElementById("mySidenav");
 
     if (document.getElementById("openNav") == null) {
         let subheader = document.getElementById("subheader");
@@ -68,7 +76,8 @@ function loadCSS() {
     head.appendChild(link);
 }
 
-function checkMenuRange(e) {
-    // if (e.clientX <= 15) { toggleNav(status.on); };
-    // if (e.clientX >= sideNavWidth() + 15) { toggleNav(status.off) };
+function isClickInMenu(event) {
+
+    console.log(Number(event.clientX), Number(sideNav.clientWidth), Number(getComputedStyle(sideNav).left.split("px")[0]));
+    return Number(event.clientX) > (Number(sideNav.clientWidth) + Number(getComputedStyle(sideNav).left.split("px")[0]));
 }
