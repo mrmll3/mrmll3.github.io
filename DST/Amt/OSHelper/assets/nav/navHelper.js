@@ -18,6 +18,7 @@ export async function initNav(navDiv = "mySidenav") {
             (event.target.id != "openNav") &&
             isClickInMenu(event)) toggleNav();
     });
+    sideNav.classList.add("is-active");
 }
 
 async function addNav() {
@@ -32,10 +33,10 @@ async function addNav() {
     else sideNav = document.getElementById("mySidenav");
 
     if (document.getElementById("openNav") == null) {
-        let subheader = document.getElementById("subheader");
+        let subheader = document.getElementById("title");
         let newNav = document.createElement("button");
         newNav.id = "openNav";
-        newNav.innerText = "\u{2630} Menü"
+        newNav.innerText = "\u{2630}"
         subheader.appendChild(newNav);
         openMenuButton = document.getElementById("openNav");
     }

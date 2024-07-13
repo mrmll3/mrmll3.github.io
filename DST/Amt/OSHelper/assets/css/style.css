@@ -3,6 +3,8 @@
   --ba_gray: rgb(199, 199, 199);
   --ba_white: rgb(255, 255, 255);
   --ba_warning: rgba(255, 0, 26, 0.3);
+  --boxshadow: -3px -3px 7px rgb(255, 255, 255), 0 3px 7.2px rgba(0, 0, 0, 0.4);
+
 }
 
 * * {
@@ -50,6 +52,11 @@ body {
   }
 }
 
+#title {
+  margin-block: auto;
+  align-items: baseline;
+}
+
 #subheader {
   display: flex;
   align-items: flex-start;
@@ -81,6 +88,7 @@ body {
   position: relative;
 
   & label {
+
     position: relative;
     border: 2px solid var(--ba_gray);
     border-radius: 10px;
@@ -130,7 +138,7 @@ button {
 
 table {
   border-collapse: collapse;
-  border: solid 3px;
+  border: solid 2px;
 
   & th,
   & td {
