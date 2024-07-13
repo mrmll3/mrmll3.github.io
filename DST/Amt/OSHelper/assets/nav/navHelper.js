@@ -18,11 +18,13 @@ export async function initNav(navDiv = "mySidenav") {
             (event.target.id != "openNav") &&
             isClickInMenu(event)) toggleNav();
     });
-    sideNav.classList.add("is-active");
+    // show menu @ start
+    // sideNav.classList.add("is-active");
 }
 
 async function addNav() {
     let body = document.body;
+    // append invisible sidenav to document
     if (document.getElementById("mySidenav") == null) {
         let newNav = document.createElement("nav");
         newNav.className = "sidenav";
@@ -31,13 +33,13 @@ async function addNav() {
         sideNav = document.getElementById("mySidenav");
     }
     else sideNav = document.getElementById("mySidenav");
-
+    // append button to open menu to title in heading
     if (document.getElementById("openNav") == null) {
-        let subheader = document.getElementById("title");
-        let newNav = document.createElement("button");
-        newNav.id = "openNav";
-        newNav.innerText = "\u{2630}"
-        subheader.appendChild(newNav);
+        let title = document.getElementById("title");
+        let navButton = document.createElement("button");
+        navButton.id = "openNav";
+        navButton.innerText = "\u{2630}"
+        title.appendChild(navButton);
         openMenuButton = document.getElementById("openNav");
     }
     else openMenuButton = document.getElementById("openNav");
