@@ -47,13 +47,13 @@ window.onload = (event) => {
   initNav();
 }
 
-async function addYearsToDate(date, years) {
+function addYearsToDate(date, years) {
   let newDate = new Date(date);
   newDate.setFullYear(newDate.getFullYear() + years);
   return newDate;
 }
 
-async function addMonthToDate(date, months) {
+function addMonthToDate(date, months) {
   // TODO: Implementierung von Kalendermonaten
   // 
   let newDate = new Date(date);
@@ -61,12 +61,12 @@ async function addMonthToDate(date, months) {
   return newDate;
 }
 
-async function addWeeksToDate(date, weeks) {
+function addWeeksToDate(date, weeks) {
   let newDate = addDaysToDate(date, weeks * 7)
   return newDate;
 }
 
-async function addDaysToDate(date, days) {
+function addDaysToDate(date, days) {
   let newDate = new Date(date);
   newDate.setDate(newDate.getDate() + days);
   return newDate;
