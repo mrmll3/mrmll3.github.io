@@ -26,10 +26,11 @@ function calculateNewDate() {
 
   // Calculate the new date
   let newDate = new Date(userDate);
-  if (years != 0) { newDate = addYearsToDate(userDate, years) };
-  if (months != 0) { newDate = addMonthToDate(userDate, months) };
-  if (weeks != 0) { newDate = addWeeksToDate(userDate, weeks) };
-  if (days != 0) { newDate = addDaysToDate(userDate, days) };
+
+  if (years != 0) { newDate = addYearsToDate(newDate, years) };
+  if (months != 0) { newDate = addMonthToDate(newDate, months) };
+  if (weeks != 0) { newDate = addWeeksToDate(newDate, weeks) };
+  if (days != 0) { newDate = addDaysToDate(newDate, days) };
 
   dateOutput.innerHTML = newDate.toLocaleDateString();
 }
@@ -46,24 +47,26 @@ window.onload = (event) => {
   initNav();
 }
 
-function addYearsToDate(date, years) {
+async function addYearsToDate(date, years) {
   let newDate = new Date(date);
   newDate.setFullYear(newDate.getFullYear() + years);
   return newDate;
 }
 
-function addMonthToDate(date, months) {
+async function addMonthToDate(date, months) {
+  // TODO: Implementierung von Kalendermonaten
+  // 
   let newDate = new Date(date);
   newDate.setMonth(newDate.getMonth() + months);
   return newDate;
 }
 
-function addWeeksToDate(date, weeks) {
+async function addWeeksToDate(date, weeks) {
   let newDate = addDaysToDate(date, weeks * 7)
   return newDate;
 }
 
-function addDaysToDate(date, days) {
+async function addDaysToDate(date, days) {
   let newDate = new Date(date);
   newDate.setDate(newDate.getDate() + days);
   return newDate;
