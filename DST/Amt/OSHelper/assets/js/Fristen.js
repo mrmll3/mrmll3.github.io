@@ -42,6 +42,13 @@ window.onload = (event) => {
     calculateNewDate();
   });
 
+  dateInput.addEventListener("focus", (event) => {event.target.select();});
+  yearsInput.addEventListener("focus", (event) => {event.target.select();});
+  monthsInput.addEventListener("focus", (event) => {event.target.select();});
+  weeksInput.addEventListener("focus", (event) => {event.target.select();});
+  daysInput.addEventListener("focus", (event) => {event.target.select();});
+
+  
   dateInput.value = new Date().toISOString().split("T")[0];
   dateInput.focus();
   initNav();
