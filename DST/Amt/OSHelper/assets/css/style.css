@@ -78,14 +78,16 @@ body {
 
 #toolbox-container form {
   display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  align-content: center;
-  justify-content: left;
+  @media (max-width: 750px) { flex-direction: column; }  
+  @media (min-width: 751px) {  
+    display: flex;  
+    flex-wrap:  wrap;  
+  }
+  
   gap: 0.2rem;
   padding: 0.5rem 0;
   margin: 0.5rem 0;
-  position: relative;
+  position:  relative;
 
   & label {
 
