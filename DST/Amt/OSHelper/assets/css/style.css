@@ -132,8 +132,7 @@ button {
   text-transform: uppercase;
   font-weight: 500;
   font-size: large;
-  padding: 8px 15px;
-  margin-left: 10px;
+  padding: 8px 15px;  
   border-radius: 7px;
   cursor: pointer;
 }
