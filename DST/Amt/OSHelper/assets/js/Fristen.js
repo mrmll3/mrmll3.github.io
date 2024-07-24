@@ -2,7 +2,7 @@
 
 import { initNav } from '../nav/navHelper.js';
 
-
+// region: DOM elements
 // Define constants for DOM elements
 const formDateDif = document.getElementById("formDateDif");
 const dateInput = document.querySelector("#date");
@@ -53,6 +53,8 @@ window.onload = (event) => {
   dateInput.focus();
   initNav();
 }
+
+// region: date functions
 
 function addYearsToDate(date, years) {
   let newDate = new Date(date);

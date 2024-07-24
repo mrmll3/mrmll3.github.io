@@ -1,4 +1,9 @@
 function calculateHolidays(year) {
+    // 
+    // berechnet die Feiertage eines gegebenen Jahres
+    // Feiertage für das Bundesland Schleswig Holstein
+    // 
+    
     const easter = calculateEasterSunday(year);
     const holidays = {
         'Neujahrstag': new Date(year, 0, 1),

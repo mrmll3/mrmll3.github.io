@@ -1,7 +1,7 @@
 'use strict'
 import { initNav } from '../nav/navHelper.js';
 
-// global declarations
+// region: global declarations
 const excludeDays = [0, 6]; //sunday & monday
 var excludeHolidays = [];
 const form = document.getElementById('date-form');
@@ -37,7 +37,7 @@ function init() {
 }
 
 
-// main functions
+// region: main functions
 
 function update_holidays() {
     // 

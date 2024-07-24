@@ -2,7 +2,7 @@
   --ba_red: rgb(255, 0, 26);
   --ba_gray: rgb(199, 199, 199);
   --ba_white: rgb(255, 255, 255);
-  --ba_warning: rgba(255, 0, 26, 0.3);
+  --ba_warning: rgba(from var(--ba_red) r g b / 0.3);
   --boxshadow: -3px -3px 7px rgb(255, 255, 255), 0 3px 7.2px rgba(0, 0, 0, 0.4);
 
 }
@@ -93,7 +93,7 @@ body {
   gap: 0.2rem;
   padding: 0.5rem 0;
   margin: 0.5rem 0;
-  /* position: relative; */
+
 
   & label {
 
