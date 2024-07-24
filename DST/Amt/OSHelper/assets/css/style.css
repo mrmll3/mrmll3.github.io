@@ -78,16 +78,21 @@ body {
 
 #toolbox-container form {
   display: flex;
-  @media (max-width: 750px) { flex-direction: column; }  
-  @media (min-width: 751px) {  
-    display: flex;  
-    flex-wrap:  wrap;  
+
+  @media (max-width: 750px) {
+    flex-direction: column;
   }
-  
+
+  @media (min-width: 751px) {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
   gap: 0.2rem;
   padding: 0.5rem 0;
   margin: 0.5rem 0;
-  position:  relative;
+  position: relative;
+  align-items: center;
 
   & label {
 
@@ -134,7 +139,7 @@ button {
   text-transform: uppercase;
   font-weight: 500;
   font-size: large;
-  padding: 8px 15px;  
+  padding: 8px 15px;
   border-radius: 7px;
   cursor: pointer;
 }
@@ -152,10 +157,10 @@ table {
 }
 
 #result {
-    text-align: center;
-    font-size: 2rem;
-    font-weight: 700;
-    margin: 0px;
-    padding-block: 5px;
-    background-color: lightgrey;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0px;
+  padding-block: 5px;
+  background-color: lightgrey;
 }
