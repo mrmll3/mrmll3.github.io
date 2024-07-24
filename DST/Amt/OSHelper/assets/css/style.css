@@ -81,18 +81,19 @@ body {
 
   @media (max-width: 750px) {
     flex-direction: column;
+    align-items: stretch;
   }
 
   @media (min-width: 751px) {
     flex-direction: row;
     flex-wrap: wrap;
+    align-items: center;
   }
 
   gap: 0.2rem;
   padding: 0.5rem 0;
   margin: 0.5rem 0;
-  position: relative;
-  align-items: center;
+  /* position: relative; */
 
   & label {
 
