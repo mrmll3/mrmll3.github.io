@@ -111,5 +111,5 @@ function add_result() {
         newRow.innerHTML += "<td>&#9744;</td>";
     }
     resultsBody.appendChild(newRow);
-    form_start_date.focus();
+    // form_start_date.focus();
 }
