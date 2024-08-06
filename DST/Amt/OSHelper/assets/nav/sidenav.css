@@ -36,9 +36,6 @@
         transition: 0.15s ease-in;
         outline: none;
 
-        &::before {
-            content: "Menü";
-        }
     }
 }
 
