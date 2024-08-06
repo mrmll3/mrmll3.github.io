@@ -30,19 +30,17 @@ async function addNav() {
         newNav.className = "sidenav";
         newNav.id = "mySidenav";
         body.appendChild(newNav);
-        sideNav = document.getElementById("mySidenav");
     }
-    else sideNav = document.getElementById("mySidenav");
+    sideNav = document.getElementById("mySidenav");
     // append button to open menu to title in heading
     if (document.getElementById("openNav") == null) {
         let title = document.getElementById("title");
         let navButton = document.createElement("button");
         navButton.id = "openNav";
-        navButton.innerText = "\u{2630}"
         title.appendChild(navButton);
-        openMenuButton = document.getElementById("openNav");
     }
-    else openMenuButton = document.getElementById("openNav");
+    openMenuButton = document.getElementById("openNav");
+    openMenuButton.innerText += " \u{2630}"
 }
 
 async function addNavElements(navDiv) {
