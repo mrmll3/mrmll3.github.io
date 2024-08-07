@@ -33,13 +33,15 @@ async function addNav() {
     }
     sideNav = document.getElementById("mySidenav");
     // append button to open menu to title in heading
-    if (document.getElementById("openNav") == null) {
+    if (document.getElementsByClassName("openNav") == null) {
         let title = document.getElementById("title");
         let navButton = document.createElement("button");
-        navButton.id = "openNav";
+        // navButton.id = "openNav";
+        navButton.className = "openNav";
         title.appendChild(navButton);
     }
-    openMenuButton = document.getElementById("openNav");
+    // openMenuButton = document.getElementById("openNav");
+    openMenuButton = document.getElementsByClassName("openNav")[0];
     openMenuButton.innerText += " \u{2630}"
 }
 
