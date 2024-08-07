@@ -15,7 +15,7 @@ export async function initNav(navDiv = "mySidenav") {
     openMenuButton.addEventListener("click", () => { toggleNav(); });
     window.addEventListener("click", (event) => {
         if (sideNav.classList.contains("is-active") &&
-            (event.target.id != "openNav") &&
+            (!event.target.classList.contains("openNav")) &&
             isClickInMenu(event)) toggleNav();
     });
     // show menu @ start

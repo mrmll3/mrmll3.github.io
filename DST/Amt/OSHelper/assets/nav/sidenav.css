@@ -7,7 +7,7 @@
     --boxshadow: -3px -3px 7px rgba(255, 255, 255, 0.8), 3px 3px 7.2px rgba(0, 0, 0, 0.4);
 }
 
-#openNav {
+.openNav {
     background-color: transparent;
     color: black;
     border: none;
