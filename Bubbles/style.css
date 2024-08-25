@@ -1,0 +1,171 @@
+html,
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: large;
+    font-weight: bold;
+    touch-action: manipulation;
+    overscroll-behavior-x: none;
+    color: white;
+    height: 100%;
+    width: 100%;
+}
+
+html,
+body,
+#playArea,
+canvas {
+    background: rgb(53, 53, 53);
+    margin: 0px;
+    padding: 0px;
+    border: 0px;
+}
+
+canvas {
+    overflow: hidden;
+    display: block;
+}
+
+#end_card {
+    animation: wiggle 1s linear;
+    animation-delay: 0.0s;
+    /* transition: all .5s, transform 0.2s; */
+    background-color: whitesmoke;
+    color: black;
+    /* opacity: 80%; */
+    border-radius: 0.5em;
+}
+
+#end_card:hover {
+    /* animation: wiggle 2s linear; */
+    /* opacity: 100%; */
+    /* transform: scale(1.1); */
+}
+
+
+
+.centered {
+    position: fixed;
+    z-index: 100;
+    top: 50%;
+    left: 50%;
+    margin: -100px 0 0 -200px;
+    width: 400px;
+    height: 200px;
+    padding: 1em;
+}
+
+#btn_next_round {
+    position: absolute;
+    bottom: 0.5em;
+    right: 0.5em;
+}
+
+.vertical-center {
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+}
+
+/* nice header */
+.header {
+    overflow: hidden;
+    float: left;
+    display: inline;
+    width: 100%;
+    text-align: center;
+    /* background: #f1f1f1; */
+    color: black;
+}
+
+/* .header:hover {
+    opacity: 100%;
+} */
+
+.button_header {
+    float: left;
+    padding: .3em .5em;
+    background-color: #ffbd00;
+    color: black;
+    font-weight: bold;
+    font-size: large;
+    border: none;
+    /* border-radius: 0.3em; */
+    transform: rotate(360deg);
+    background-image: linear-gradient(#6fcb14 0 0);
+    background-size: 200% .08em;
+    background-position: 200% 100%;
+    background-repeat: no-repeat;
+    transition: transform .3s, all .5s;
+}
+
+.button_header:hover {
+    z-index: 999;
+    /* transform: scale(1.3); */
+    background-size: 200% 100%;
+    background-position: 100% 100%;
+    /* border-radius: 0.3em; */
+    padding: .5em 1.5em;
+
+}
+
+.button_label {
+    padding: 0.3em;
+    padding-left: 1em;
+    padding-right: 1em;
+    opacity: 90%;
+    background-color: #f1f1f1;
+    color: black;
+    font-weight: bold;
+    font-size: large;
+    border: none;
+}
+
+.ul_header {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.ul_header li {
+    float: left;
+    text-align: center;
+}
+
+
+
+/* Keyframes */
+@keyframes wiggle {
+
+    0%,
+    7% {
+        transform: rotateZ(0);
+    }
+
+    15% {
+        transform: rotateZ(-15deg);
+    }
+
+    20% {
+        transform: rotateZ(10deg);
+    }
+
+    25% {
+        transform: rotateZ(-10deg);
+    }
+
+    30% {
+        transform: rotateZ(6deg);
+    }
+
+    35% {
+        transform: rotateZ(-4deg);
+    }
+
+    40%,
+    100% {
+        transform: rotateZ(0);
+    }
+}

@@ -1,0 +1,5 @@
+[Vorname] [Nachname] geboren am [Geburtsdatum] hat Berufsausbildungsbeihilfe während einer Berufsausbildung beantragt.
+
+Bitte teilen Sie mir mit, ob [Vorname] in einer sonstigen sozialen Einrichtung untergebracht ist.
+
+Bitte übermitteln Sie mir die aktuelle Entgeltvereinbarung.

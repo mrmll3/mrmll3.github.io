@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <!-- <meta http-equiv="X-UA-Compatible" content="IE=edge"> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./assets/css/style.css">
+    <link rel="shortcut icon" href="./assets/img/240px-Bundesagentur_für_Arbeit_logo.png" type="image/x-icon">
+    <title>Amtshilfe</title>
+</head>
+
+<body>
+
+    <div id="demo">
+        <h1>The XMLHttpRequest Object</h1>
+        <button type="button" onclick="loadDoc()">Change Content</button>
+    </div>
+
+    <script>
+        function loadDoc() {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    var html = this.responseText;
+                    // html = html.replaceAll("./", "https://mrmll3.github.io/DST/Amt/OSHelper/");
+                    document.body.innerHTML = html;
+                }
+            };
+            xhttp.open("GET", "https://mrmll3.github.io/DST/Amt/OSHelper/Fristen.html", true);
+            xhttp.send();
+        }
+    </script>
+
+
+
+</body>
+
+</html>

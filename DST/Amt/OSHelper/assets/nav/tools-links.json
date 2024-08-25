@@ -1,0 +1,16 @@
+{
+    "Tools": [
+        {
+            "Name": "Tage zwischen Daten",
+            "Link": "./Tage.html"
+        },
+        {
+            "Name": "Fristenrechner",
+            "Link": "./Fristen.html"
+        },
+        {
+            "Name": "Mutterschutz",
+            "Link": "#"
+        }
+    ]
+}

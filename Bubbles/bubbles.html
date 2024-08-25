@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>bubbles</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div id="header" , class="header">
+    <ul class="ul_header">
+      <li><button id="btn_fullscreen_toggle" class="button_header">Fullscreen</button></li>
+      <li><button id="btn_restart" class="button_header">start over</button></li>
+      <li><img src="" id="unicorn" alt=""></li>
+      <li style="float:right; background-color: none"><button id="timer" class="button_label">00:00:00</button></li>
+      <li style="float:right; background-color: none; display: none;"><button id="bubbles_count" class="button_label"> 0
+          of 9 shot</button></li>
+    </ul>
+  </div>
+  <div id="end_card" class="centered" style="display: none">
+    <div id="end_card_message" class="end_card_message">message</div>
+    <button id="btn_next_round" class="button_header" class="vertical-center">next round</button>
+  </div>
+  <div id="playArea" class="playArea">
+    <canvas id="playCanvas"></canvas>
+  </div>
+  <script src="bubbles.js"></script>
+</body>
+
+
+</html>
