@@ -58,7 +58,7 @@ async function Jugendhilfe_init(params) {
   await addTemplateTexts();
 
   Jugendhilfe_birthdate.value = new Date().toISOString().split("T")[0];
-  Jugendhilfe_birthdate.focus();
+  Jugendhilfe_firstname.focus();
 
 }
 Jugendhilfe_init();
