@@ -93,9 +93,9 @@ function Jugendhilfe_renderTexts(Typ = "BVB") {
   if (Typ !== "BVB" && Typ !== "BAB") { throw new Error(`Typ muss "BAB" oder "BVB" sein; übergeben wurde ${Typ}.`); }
 
   const replacements = {
-    "[Vorname]": Jugendhilfe_firstname.value,
-    "[Nachname]": Jugendhilfe_lastname.value,
-    "[KD-Nr]": Jugendhilfe_KD.value,
+    "[VORNAME]": Jugendhilfe_firstname.value,
+    "[NACHNAME]": Jugendhilfe_lastname.value,
+    "[KD-Nummer]": Jugendhilfe_KD.value,
     "[Geburtsdatum]": (new Date(Jugendhilfe_birthdate.value)).toLocaleDateString()
   }
 
