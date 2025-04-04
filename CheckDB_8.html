@@ -1,0 +1,2087 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checklisten App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/dexie@4/dist/dexie.js"></script>
+    <style>
+        @font-face {
+            font-family: 'LucideIcons';
+            src: url(https://unpkg.com/lucide-static@latest/font/Lucide.ttf) format('truetype');
+        }
+
+        .lucide {
+            font-family: 'LucideIcons';
+            font-size: 1.25rem;
+            /* Standardgröße für Icons */
+            line-height: 1;
+            display: inline-block;
+            font-style: normal;
+            font-weight: normal;
+            font-variant: normal;
+            text-rendering: auto;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Druckstile */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            #print-area,
+            #print-area * {
+                visibility: visible;
+            }
+
+            #print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            /* Zusätzliche Druckstile für bessere Lesbarkeit */
+            #print-area h2,
+            #print-area h3,
+            #print-area label {
+                color: #000 !important;
+            }
+
+            #print-area input[type="text"],
+            #print-area input[type="date"],
+            #print-area textarea {
+                border: 1px solid #ccc !important;
+            }
+
+            #print-area input[type="checkbox"],
+            #print-area input[type="radio"] {
+                margin-right: 5px;
+            }
+
+            #print-area a {
+                text-decoration: none;
+                color: #000 !important;
+            }
+
+            #print-area img {
+                max-width: 100px;
+                /* Bildgröße im Druck begrenzen */
+                max-height: 100px;
+            }
+
+            #print-area table {
+                border-collapse: collapse;
+                width: 100%;
+                margin-top: 10px;
+                border: 1px solid #ccc !important;
+            }
+
+            #print-area th,
+            #print-area td {
+                border: 1px solid #ccc !important;
+                padding: 4px;
+                text-align: left;
+            }
+        }
+    </style>
+    <script>
+        // Tailwind Konfiguration (optional, für Anpassungen)
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-gray-100 font-sans flex flex-col min-h-screen">
+
+    <header class="bg-blue-600 text-white p-4 shadow-md no-print">
+        <h1 class="text-2xl font-bold">Checklisten App</h1>
+    </header>
+
+    <nav class="bg-white shadow-md no-print">
+        <div class="container mx-auto px-4">
+            <div class="flex border-b border-gray-200">
+                <button data-tab="templates"
+                    class="tab-button py-3 px-6 text-gray-600 border-b-2 border-transparent hover:text-blue-600 hover:border-blue-600 focus:outline-none active-tab">
+                    <span class="lucide mr-2">&#xe919;</span> Vorlagen
+                </button>
+                <button data-tab="instances"
+                    class="tab-button py-3 px-6 text-gray-600 border-b-2 border-transparent hover:text-blue-600 hover:border-blue-600 focus:outline-none">
+                    <span class="lucide mr-2">&#xeb1e;</span> Instanzen
+                </button>
+                <button data-tab="checklist"
+                    class="tab-button py-3 px-6 text-gray-600 border-b-2 border-transparent hover:text-blue-600 hover:border-blue-600 focus:outline-none"
+                    disabled>
+                    <span class="lucide mr-2">&#xea11;</span> Checkliste
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto p-4 flex-grow">
+
+        <div id="templates-tab" class="tab-content">
+            <div class="flex justify-between items-center mb-4 no-print">
+                <h2 class="text-xl font-semibold text-gray-700">Vorlagen</h2>
+                <div>
+                    <button id="import-templates-btn"
+                        class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mr-2">
+                        <span class="lucide mr-2">&#xea55;</span> Importieren
+                    </button>
+                    <button id="export-templates-btn"
+                        class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded mr-2">
+                        <span class="lucide mr-2">&#xea53;</span> Exportieren
+                    </button>
+                    <button id="add-template-btn"
+                        class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                        <span class="lucide mr-2">&#xea17;</span> Neue Vorlage
+                    </button>
+                </div>
+            </div>
+            <div class="flex justify-end items-center mb-4 space-x-2 no-print">
+                <label for="sort-templates" class="text-sm font-medium text-gray-700">Sortieren nach:</label>
+                <select id="sort-templates" class="rounded border border-gray-300 p-1 text-sm">
+                    <option value="name_asc">Name (A-Z)</option>
+                    <option value="name_desc">Name (Z-A)</option>
+                    <option value="date_newest">Datum (Neueste)</option>
+                    <option value="date_oldest">Datum (Älteste)</option>
+                </select>
+            </div>
+            <div id="templates-list" class="bg-white p-4 rounded shadow">
+                <p class="text-gray-500">Keine Vorlagen gefunden.</p>
+            </div>
+        </div>
+
+        <div id="instances-tab" class="tab-content hidden">
+            <div class="flex justify-between items-center mb-4 no-print">
+                <h2 class="text-xl font-semibold text-gray-700">Gespeicherte Instanzen</h2>
+                <div>
+                    <button id="import-instances-btn"
+                        class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mr-2">
+                        <span class="lucide mr-2">&#xea55;</span> Importieren
+                    </button>
+                    <button id="export-instances-btn"
+                        class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded mr-2">
+                        <span class="lucide mr-2">&#xea53;</span> Exportieren
+                    </button>
+                </div>
+            </div>
+            <div class="flex justify-between items-center mb-4 space-x-2 no-print">
+                <div class="relative flex-grow">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
+                        <span class="lucide text-lg">&#xea3f;</span>
+                    </span>
+                    <input type="text" id="search-instances" placeholder="Instanzen suchen..."
+                        class="w-full pl-10 pr-4 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <div class="flex items-center space-x-2">
+                    <label for="sort-instances" class="text-sm font-medium text-gray-700">Sortieren nach:</label>
+                    <select id="sort-instances" class="rounded border border-gray-300 p-1 text-sm">
+                        <option value="name_asc">Name (A-Z)</option>
+                        <option value="name_desc">Name (Z-A)</option>
+                        <option value="date_newest">Datum (Neueste)</option>
+                        <option value="date_oldest">Datum (Älteste)</option>
+                    </select>
+                </div>
+            </div>
+            <div id="instances-list" class="bg-white p-4 rounded shadow">
+                <p class="text-gray-500">Keine Instanzen gefunden.</p>
+            </div>
+        </div>
+
+        <div id="checklist-tab" class="tab-content hidden">
+            <div class="flex justify-between items-center mb-4 no-print">
+                <h2 id="checklist-title" class="text-xl font-semibold text-gray-700">Checkliste</h2>
+                <div>
+                    <button id="save-checklist-btn"
+                        class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mr-2">
+                        <span class="lucide mr-2">&#xea48;</span> Speichern
+                    </button>
+                    <button id="print-checklist-btn"
+                        class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded mr-2">
+                        <span class="lucide mr-2">&#xea27;</span> Drucken
+                    </button>
+                    <button id="close-checklist-btn"
+                        class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">
+                        <span class="lucide mr-2">&#xea0f;</span> Schließen
+                    </button>
+                </div>
+            </div>
+            <div id="checklist-content" class="bg-white p-6 rounded shadow space-y-4">
+            </div>
+            <div id="print-area" class="hidden"></div>
+        </div>
+
+    </main>
+
+    <footer class="bg-gray-200 text-center text-sm text-gray-600 p-3 mt-6 no-print">
+        Checklisten App &copy; <span id="current-year"></span>
+    </footer>
+
+    <div id="template-editor-modal"
+        class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center hidden no-print">
+        <div class="relative mx-auto p-6 border w-full max-w-4xl shadow-lg rounded-md bg-white">
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <h3 id="template-modal-title" class="text-xl font-semibold">Vorlage erstellen/bearbeiten</h3>
+                <button id="close-template-modal"
+                    class="text-gray-700 hover:text-red-500 text-2xl font-bold">&times;</button>
+            </div>
+            <form id="template-form">
+                <input type="hidden" id="template-id">
+                <div class="mb-4">
+                    <label for="template-name"
+                        class="block text-sm font-medium text-gray-700 mb-1">Vorlagenname:</label>
+                    <input type="text" id="template-name" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div class="mb-4">
+                    <h4 class="text-lg font-medium text-gray-800 mb-2">Elemente:</h4>
+                    <div id="template-items-container"
+                        class="border border-gray-200 p-4 rounded-md bg-gray-50 min-h-[200px] max-h-[400px] overflow-y-auto space-y-3">
+                    </div>
+                    <div class="mt-3 flex space-x-2">
+                        <label for="add-element-type" class="sr-only">Elementtyp auswählen</label>
+                        <select id="add-element-type" class="border border-gray-300 rounded-md p-2">
+                            <option value="group">Gruppe (Überschrift)</option>
+                            <option value="checkbox">Kontrollkästchen</option>
+                            <option value="text">Textfeld</option>
+                            <option value="radio">Optionsfeld-Gruppe</option>
+                            <option value="table">Tabelle</option>
+                            <option value="image">Bild (URL)</option>
+                            <option value="link">Hyperlink</option>
+                            <option value="date">Datumsauswahl</option>
+                        </select>
+                        <button type="button" id="add-element-btn"
+                            class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                            <span class="lucide mr-2">&#xea17;</span> Element hinzufügen
+                        </button>
+                    </div>
+                </div>
+                <div class="flex justify-end mt-6">
+                    <button type="button" id="cancel-template-edit"
+                        class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded mr-2">
+                        Abbrechen
+                    </button>
+                    <button type="submit" id="save-template-btn"
+                        class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+                        <span class="lucide mr-2">&#xea48;</span> Vorlage speichern
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="instance-name-modal"
+        class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center hidden no-print">
+        <div class="relative mx-auto p-6 border w-full max-w-md shadow-lg rounded-md bg-white">
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <h3 class="text-xl font-semibold">Instanz benennen</h3>
+                <button id="close-instance-name-modal"
+                    class="text-gray-700 hover:text-red-500 text-2xl font-bold">&times;</button>
+            </div>
+            <form id="instance-name-form">
+                <input type="hidden" id="instance-template-id">
+                <div class="mb-4">
+                    <label for="instance-name" class="block text-sm font-medium text-gray-700 mb-1">Instanzname:</label>
+                    <input type="text" id="instance-name" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div class="flex justify-end mt-6">
+                    <button type="button" id="cancel-instance-creation"
+                        class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded mr-2">
+                        Abbrechen
+                    </button>
+                    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                        <span class="lucide mr-2">&#xea17;</span> Instanz erstellen
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="import-export-modal"
+        class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center hidden no-print">
+        <div class="relative mx-auto p-6 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <h3 id="import-export-title" class="text-xl font-semibold">Import/Export</h3>
+                <button id="close-import-export-modal"
+                    class="text-gray-700 hover:text-red-500 text-2xl font-bold">&times;</button>
+            </div>
+            <div id="import-export-content">
+            </div>
+            <div class="flex justify-end mt-6">
+                <button type="button" id="cancel-import-export"
+                    class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded mr-2">
+                    Schließen
+                </button>
+                <button type="button" id="confirm-import-export-btn"
+                    class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded hidden">
+                    Bestätigen
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirmation-modal"
+        class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center hidden no-print z-50">
+        <div class="relative mx-auto p-6 border w-full max-w-sm shadow-lg rounded-md bg-white">
+            <div class="text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 mb-4">
+                    <span class="lucide text-yellow-600 text-2xl">&#xe9a6;</span>
+                </div>
+                <h3 class="text-lg leading-6 font-medium text-gray-900" id="confirmation-title">Bestätigung</h3>
+                <div class="mt-2 px-7 py-3">
+                    <p class="text-sm text-gray-500" id="confirmation-message">Möchten Sie diesen Vorgang wirklich
+                        ausführen?</p>
+                </div>
+                <div class="items-center px-4 py-3">
+                    <button id="confirm-yes-btn"
+                        class="px-4 py-2 bg-red-500 text-white text-base font-medium rounded-md w-auto shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 mr-2">
+                        Ja
+                    </button>
+                    <button id="confirm-no-btn"
+                        class="px-4 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded-md w-auto shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400">
+                        Nein
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="message-box"
+        class="fixed bottom-4 right-4 p-4 rounded-md shadow-lg text-white hidden z-50 max-w-sm no-print" role="alert">
+        <span id="message-text"></span>
+        <button id="close-message-box" class="absolute top-1 right-1 text-xl font-bold px-2">&times;</button>
+    </div>
+
+
+    <script>
+        // --- Dexie DB Setup ---
+        const db = new Dexie("ChecklistAppDB");
+        db.version(1).stores({
+            templates: '++id, name, createdAt, updatedAt', // id is auto-incrementing primary key, index name and dates
+            instances: '++id, name, createdAt, updatedAt, *searchTerms' // index name, dates and search terms
+        });
+
+        // --- Global State ---
+        let currentTemplateData = null; // Holds data while editing a template
+        let currentInstanceData = null; // Holds data for the active checklist instance
+        let currentEditingItemId = null; // ID of the item being edited in template editor
+        let currentSortTemplates = 'name_asc';
+        let currentSortInstances = 'name_asc';
+        let currentSearchInstances = '';
+
+        // --- DOM Elements ---
+        const tabs = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const templatesTab = document.getElementById('templates-tab');
+        const instancesTab = document.getElementById('instances-tab');
+        const checklistTab = document.getElementById('checklist-tab');
+        const templatesListContainer = document.getElementById('templates-list');
+        const instancesListContainer = document.getElementById('instances-list');
+        const checklistContentContainer = document.getElementById('checklist-content');
+        const checklistTitle = document.getElementById('checklist-title');
+        const addTemplateBtn = document.getElementById('add-template-btn');
+        const templateEditorModal = document.getElementById('template-editor-modal');
+        const closeTemplateModalBtn = document.getElementById('close-template-modal');
+        const cancelTemplateEditBtn = document.getElementById('cancel-template-edit');
+        const templateForm = document.getElementById('template-form');
+        const templateNameInput = document.getElementById('template-name');
+        const templateIdInput = document.getElementById('template-id');
+        const templateItemsContainer = document.getElementById('template-items-container');
+        const addElementTypeSelect = document.getElementById('add-element-type');
+        const addElementBtn = document.getElementById('add-element-btn');
+        const templateModalTitle = document.getElementById('template-modal-title');
+        const instanceNameModal = document.getElementById('instance-name-modal');
+        const closeInstanceNameModalBtn = document.getElementById('close-instance-name-modal');
+        const cancelInstanceCreationBtn = document.getElementById('cancel-instance-creation');
+        const instanceNameForm = document.getElementById('instance-name-form');
+        const instanceNameInput = document.getElementById('instance-name');
+        const instanceTemplateIdInput = document.getElementById('instance-template-id');
+        const saveChecklistBtn = document.getElementById('save-checklist-btn');
+        const closeChecklistBtn = document.getElementById('close-checklist-btn');
+        const printChecklistBtn = document.getElementById('print-checklist-btn');
+        const printArea = document.getElementById('print-area');
+        const sortTemplatesSelect = document.getElementById('sort-templates');
+        const sortInstancesSelect = document.getElementById('sort-instances');
+        const searchInstancesInput = document.getElementById('search-instances');
+        const importTemplatesBtn = document.getElementById('import-templates-btn');
+        const exportTemplatesBtn = document.getElementById('export-templates-btn');
+        const importInstancesBtn = document.getElementById('import-instances-btn');
+        const exportInstancesBtn = document.getElementById('export-instances-btn');
+        const importExportModal = document.getElementById('import-export-modal');
+        const closeImportExportModalBtn = document.getElementById('close-import-export-modal');
+        const cancelImportExportBtn = document.getElementById('cancel-import-export');
+        const importExportTitle = document.getElementById('import-export-title');
+        const importExportContent = document.getElementById('import-export-content');
+        const confirmImportExportBtn = document.getElementById('confirm-import-export-btn');
+        const confirmationModal = document.getElementById('confirmation-modal');
+        const confirmationTitle = document.getElementById('confirmation-title');
+        const confirmationMessage = document.getElementById('confirmation-message');
+        const confirmYesBtn = document.getElementById('confirm-yes-btn');
+        const confirmNoBtn = document.getElementById('confirm-no-btn');
+        const messageBox = document.getElementById('message-box');
+        const messageText = document.getElementById('message-text');
+        const closeMessageBoxBtn = document.getElementById('close-message-box');
+
+
+        // --- Utility Functions ---
+
+        /** Generates a simple unique ID */
+        function generateUUID() {
+            return crypto.randomUUID();
+        }
+
+        /** Shows a message box */
+        function showMessage(text, type = 'success', duration = 3000) {
+            messageText.textContent = text;
+            messageBox.classList.remove('hidden', 'bg-green-500', 'bg-red-500', 'bg-yellow-500');
+            if (type === 'success') {
+                messageBox.classList.add('bg-green-500');
+            } else if (type === 'error') {
+                messageBox.classList.add('bg-red-500');
+            } else { // warning or info
+                messageBox.classList.add('bg-yellow-500');
+                messageBox.classList.replace('text-white', 'text-black'); // Yellow needs black text
+            }
+            messageBox.classList.add('opacity-100');
+
+            // Auto-hide after duration
+            setTimeout(() => {
+                hideMessage();
+            }, duration);
+        }
+
+        /** Hides the message box */
+        function hideMessage() {
+            messageBox.classList.add('opacity-0');
+            // Use transition end event or timeout to set display none
+            setTimeout(() => {
+                messageBox.classList.add('hidden');
+                messageBox.classList.remove('opacity-0', 'opacity-100'); // Reset opacity for next time
+                messageBox.classList.replace('text-black', 'text-white'); // Reset text color
+            }, 500); // Match duration of a fade-out transition if added
+        }
+
+        /** Shows the confirmation modal */
+        function showConfirmation(title, message, onConfirm) {
+            confirmationTitle.textContent = title;
+            confirmationMessage.textContent = message;
+            confirmationModal.classList.remove('hidden');
+
+            // Remove previous listeners to avoid stacking
+            const newConfirmYesBtn = confirmYesBtn.cloneNode(true);
+            confirmYesBtn.parentNode.replaceChild(newConfirmYesBtn, confirmYesBtn);
+            confirmYesBtn = newConfirmYesBtn; // Update reference
+
+            const newConfirmNoBtn = confirmNoBtn.cloneNode(true);
+            confirmNoBtn.parentNode.replaceChild(newConfirmNoBtn, confirmNoBtn);
+            confirmNoBtn = newConfirmNoBtn; // Update reference
+
+
+            confirmYesBtn.onclick = () => {
+                hideConfirmation();
+                onConfirm();
+            };
+            confirmNoBtn.onclick = hideConfirmation;
+        }
+
+        /** Hides the confirmation modal */
+        function hideConfirmation() {
+            confirmationModal.classList.add('hidden');
+        }
+
+        /** Deep copies an object (needed for creating instances from templates) */
+        function deepCopy(obj) {
+            return JSON.parse(JSON.stringify(obj));
+        }
+
+        /** Formats Date object to a readable string */
+        function formatDate(date) {
+            if (!date) return 'N/A';
+            return new Date(date).toLocaleString('de-DE', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        /** Creates search terms array from instance data */
+        function createSearchTerms(instance) {
+            const terms = new Set();
+            terms.add(instance.name.toLowerCase());
+
+            function extractTerms(items) {
+                items.forEach(item => {
+                    if (item.label) terms.add(item.label.toLowerCase());
+                    if (item.value && typeof item.value === 'string') terms.add(item.value.toLowerCase());
+                    if (item.type === 'group' && item.items) {
+                        extractTerms(item.items);
+                    }
+                    if (item.type === 'table' && item.rows) {
+                        item.rows.forEach(row => row.forEach(cell => terms.add(cell.toLowerCase())));
+                    }
+                    // Add other relevant fields if needed
+                });
+            }
+            extractTerms(instance.items);
+            return Array.from(terms);
+        }
+
+
+        // --- Tab Navigation ---
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetTab = tab.dataset.tab;
+
+                // Don't switch if the tab is disabled (like checklist initially)
+                if (tab.disabled) return;
+
+                // Update button styles
+                tabs.forEach(t => t.classList.remove('active-tab', 'text-blue-600', 'border-blue-600'));
+                tab.classList.add('active-tab', 'text-blue-600', 'border-blue-600');
+
+                // Show/Hide content
+                tabContents.forEach(content => {
+                    if (content.id === `${targetTab}-tab`) {
+                        content.classList.remove('hidden');
+                    } else {
+                        content.classList.add('hidden');
+                    }
+                });
+
+                // Reset checklist view if navigating away
+                if (targetTab !== 'checklist') {
+                    resetChecklistTab();
+                }
+            });
+        });
+
+        function activateTab(tabName) {
+            const tabButton = document.querySelector(`.tab-button[data-tab="${tabName}"]`);
+            if (tabButton) {
+                tabButton.disabled = false; // Enable the tab if needed
+                tabButton.click();
+            }
+        }
+
+        function resetChecklistTab() {
+            checklistContentContainer.innerHTML = '';
+            checklistTitle.textContent = 'Checkliste';
+            currentInstanceData = null;
+            const checklistTabButton = document.querySelector('.tab-button[data-tab="checklist"]');
+            checklistTabButton.disabled = true;
+            checklistTabButton.classList.remove('active-tab', 'text-blue-600', 'border-blue-600');
+            // Optionally switch back to instances tab
+            // activateTab('instances');
+        }
+
+
+        // --- Template Management ---
+
+        /** Loads and displays templates from DB */
+        async function loadTemplates() {
+            try {
+                let query = db.templates;
+                const sortBy = currentSortTemplates;
+
+                if (sortBy === 'name_asc') query = query.orderBy('name');
+                else if (sortBy === 'name_desc') query = query.orderBy('name').reverse();
+                else if (sortBy === 'date_newest') query = query.orderBy('updatedAt').reverse();
+                else if (sortBy === 'date_oldest') query = query.orderBy('updatedAt');
+
+                const templates = await query.toArray();
+                renderTemplatesList(templates);
+            } catch (error) {
+                console.error("Fehler beim Laden der Vorlagen:", error);
+                showMessage("Fehler beim Laden der Vorlagen.", 'error');
+                templatesListContainer.innerHTML = '<p class="text-red-500">Fehler beim Laden der Vorlagen.</p>';
+            }
+        }
+
+        /** Renders the list of templates in the UI */
+        function renderTemplatesList(templates) {
+            templatesListContainer.innerHTML = ''; // Clear existing list
+            if (templates.length === 0) {
+                templatesListContainer.innerHTML = '<p class="text-gray-500">Keine Vorlagen gefunden. Erstellen Sie eine neue!</p>';
+                return;
+            }
+
+            templates.forEach(template => {
+                const div = document.createElement('div');
+                div.className = 'flex justify-between items-center p-3 border-b border-gray-200 hover:bg-gray-50';
+                div.innerHTML = `
+                    <div>
+                        <span class="font-medium text-gray-800">${template.name}</span>
+                        <p class="text-sm text-gray-500">Zuletzt geändert: ${formatDate(template.updatedAt)}</p>
+                    </div>
+                    <div class="space-x-2 flex items-center">
+                         <button data-id="${template.id}" class="create-instance-btn text-blue-500 hover:text-blue-700" title="Instanz erstellen">
+                            <span class="lucide">&#xea17;</span> </button>
+                         <button data-id="${template.id}" class="edit-template-btn text-yellow-500 hover:text-yellow-700" title="Vorlage bearbeiten">
+                            <span class="lucide">&#xeb7f;</span> </button>
+                         <button data-id="${template.id}" class="delete-template-btn text-red-500 hover:text-red-700" title="Vorlage löschen">
+                            <span class="lucide">&#xea54;</span> </button>
+                    </div>
+                `;
+                templatesListContainer.appendChild(div);
+            });
+
+            // Add event listeners for the new buttons
+            templatesListContainer.querySelectorAll('.create-instance-btn').forEach(btn => {
+                btn.addEventListener('click', () => promptInstanceName(btn.dataset.id));
+            });
+            templatesListContainer.querySelectorAll('.edit-template-btn').forEach(btn => {
+                btn.addEventListener('click', () => openTemplateEditor(btn.dataset.id));
+            });
+            templatesListContainer.querySelectorAll('.delete-template-btn').forEach(btn => {
+                btn.addEventListener('click', () => deleteTemplate(btn.dataset.id));
+            });
+        }
+
+        /** Opens the template editor modal (for new or existing template) */
+        async function openTemplateEditor(templateId = null) {
+            templateForm.reset();
+            templateItemsContainer.innerHTML = ''; // Clear previous items
+            templateIdInput.value = '';
+            currentTemplateData = null; // Reset temporary data
+
+            if (templateId) {
+                // Editing existing template
+                try {
+                    const template = await db.templates.get(parseInt(templateId));
+                    if (template) {
+                        templateModalTitle.textContent = 'Vorlage bearbeiten';
+                        templateIdInput.value = template.id;
+                        templateNameInput.value = template.name;
+                        // Store the full template data temporarily
+                        currentTemplateData = template;
+                        // Render existing items
+                        renderTemplateEditorItems(template.items || [], templateItemsContainer);
+                    } else {
+                        showMessage(`Vorlage mit ID ${templateId} nicht gefunden.`, 'error');
+                        return;
+                    }
+                } catch (error) {
+                    console.error("Fehler beim Laden der Vorlage zum Bearbeiten:", error);
+                    showMessage("Fehler beim Laden der Vorlage.", 'error');
+                    return;
+                }
+
+            } else {
+                // Creating new template
+                templateModalTitle.textContent = 'Neue Vorlage erstellen';
+                // Initialize with an empty items array
+                currentTemplateData = { items: [] };
+            }
+            templateEditorModal.classList.remove('hidden');
+        }
+
+        /** Closes the template editor modal */
+        function closeTemplateEditor() {
+            templateEditorModal.classList.add('hidden');
+            currentTemplateData = null; // Clear temporary data
+            currentEditingItemId = null; // Reset editing state
+        }
+
+        /** Renders items in the template editor */
+        function renderTemplateEditorItems(items, container, level = 0) {
+            items.forEach((item, index) => {
+                const itemElement = createTemplateEditorItemElement(item, level, index);
+                container.appendChild(itemElement);
+
+                if (item.type === 'group' && item.items) {
+                    const nestedContainer = itemElement.querySelector('.nested-items-container');
+                    if (nestedContainer) {
+                        renderTemplateEditorItems(item.items, nestedContainer, level + 1);
+                    }
+                }
+                if (item.type === 'radio' && item.options) {
+                    const optionsContainer = itemElement.querySelector('.radio-options-container');
+                    if (optionsContainer) {
+                        item.options.forEach((option, optionIndex) => {
+                            const optionElement = createRadioOptionEditorElement(item.id, option, optionIndex);
+                            optionsContainer.appendChild(optionElement);
+                        });
+                    }
+                }
+            });
+        }
+
+        /** Creates a single item element for the template editor */
+        function createTemplateEditorItemElement(item, level, index) {
+            const div = document.createElement('div');
+            div.className = `template-editor-item p-3 mb-2 border border-gray-300 rounded bg-white shadow-sm ml-${level * 4}`; // Indentation
+            div.dataset.itemId = item.id;
+            div.dataset.itemType = item.type;
+            div.dataset.itemIndex = index; // Store index for potential reordering later
+
+            let content = `
+                <div class="flex justify-between items-center mb-2">
+                    <span class="font-medium text-sm text-blue-700 uppercase">${item.type}</span>
+                    <div class="item-controls space-x-1">
+                        ${item.type === 'group' ? `<button type="button" class="add-nested-element-btn text-green-500 hover:text-green-700" title="Element hinzufügen"><span class="lucide text-sm">&#xea17;</span></button>` : ''}
+                        <button type="button" class="move-item-up-btn text-gray-500 hover:text-gray-700 ${index === 0 ? 'opacity-50 cursor-not-allowed' : ''}" title="Nach oben verschieben" ${index === 0 ? 'disabled' : ''}><span class="lucide text-sm">&#xe9aa;</span></button>
+                        <button type="button" class="move-item-down-btn text-gray-500 hover:text-gray-700" title="Nach unten verschieben"><span class="lucide text-sm">&#xe9a7;</span></button> <button type="button" class="delete-item-btn text-red-500 hover:text-red-700" title="Element löschen"><span class="lucide text-sm">&#xea54;</span></button>
+                    </div>
+                </div>
+                <div class="item-details space-y-2">
+            `;
+
+            // --- Input fields based on type ---
+            content += `
+                <div class="flex items-center space-x-2">
+                    <label for="item-label-${item.id}" class="text-sm font-medium text-gray-600 w-20 shrink-0">Label:</label>
+                    <input type="text" id="item-label-${item.id}" data-property="label" value="${item.label || ''}" class="item-input flex-grow px-2 py-1 border border-gray-300 rounded text-sm" placeholder="Angezeigter Text">
+                </div>
+            `;
+
+            switch (item.type) {
+                case 'text':
+                    content += `
+                        <div class="flex items-center space-x-2">
+                            <label for="item-placeholder-${item.id}" class="text-sm font-medium text-gray-600 w-20 shrink-0">Platzhalter:</label>
+                            <input type="text" id="item-placeholder-${item.id}" data-property="placeholder" value="${item.placeholder || ''}" class="item-input flex-grow px-2 py-1 border border-gray-300 rounded text-sm" placeholder="Optionaler Platzhalter">
+                        </div>`;
+                    break;
+                case 'radio':
+                    content += `
+                        <div>
+                            <label class="text-sm font-medium text-gray-600 block mb-1">Optionen:</label>
+                            <div class="radio-options-container space-y-1 pl-4">
+                                </div>
+                            <button type="button" class="add-radio-option-btn mt-1 text-blue-500 hover:text-blue-700 text-sm"><span class="lucide text-xs mr-1">&#xea17;</span>Option hinzufügen</button>
+                        </div>`;
+                    break;
+                case 'table':
+                    content += `
+                         <div class="flex items-center space-x-2">
+                             <label for="item-rows-${item.id}" class="text-sm font-medium text-gray-600 w-20 shrink-0">Zeilen:</label>
+                             <input type="number" id="item-rows-${item.id}" data-property="rowsCount" value="${item.rowsCount || 2}" min="1" class="item-input w-16 px-2 py-1 border border-gray-300 rounded text-sm">
+                         </div>
+                         <div class="flex items-center space-x-2">
+                             <label for="item-cols-${item.id}" class="text-sm font-medium text-gray-600 w-20 shrink-0">Spalten:</label>
+                             <input type="number" id="item-cols-${item.id}" data-property="colsCount" value="${item.colsCount || 2}" min="1" class="item-input w-16 px-2 py-1 border border-gray-300 rounded text-sm">
+                         </div>
+                         <div>
+                            <label class="text-sm font-medium text-gray-600 block mb-1">Spaltenüberschriften (optional, Komma-getrennt):</label>
+                            <input type="text" id="item-headers-${item.id}" data-property="headers" value="${(item.headers || []).join(',')}" class="item-input w-full px-2 py-1 border border-gray-300 rounded text-sm" placeholder="Header1,Header2,...">
+                         </div>`;
+                    break;
+                case 'image':
+                    content += `
+                         <div class="flex items-center space-x-2">
+                             <label for="item-url-${item.id}" class="text-sm font-medium text-gray-600 w-20 shrink-0">Bild URL:</label>
+                             <input type="url" id="item-url-${item.id}" data-property="url" value="${item.url || ''}" class="item-input flex-grow px-2 py-1 border border-gray-300 rounded text-sm" placeholder="https://...">
+                         </div>`;
+                    break;
+                case 'link':
+                    content += `
+                         <div class="flex items-center space-x-2">
+                             <label for="item-url-${item.id}" class="text-sm font-medium text-gray-600 w-20 shrink-0">Link URL:</label>
+                             <input type="url" id="item-url-${item.id}" data-property="url" value="${item.url || ''}" class="item-input flex-grow px-2 py-1 border border-gray-300 rounded text-sm" placeholder="https://...">
+                         </div>`;
+                    break;
+                case 'group':
+                    // Container for nested items
+                    content += `<div class="nested-items-container mt-2 pl-4 border-l-2 border-blue-200"></div>`;
+                    break;
+                // checkbox, date have only label
+            }
+
+            content += `</div>`; // Close item-details
+            div.innerHTML = content;
+
+            // Add event listeners for item controls and inputs
+            div.querySelector('.delete-item-btn').addEventListener('click', (e) => {
+                const itemDiv = e.target.closest('.template-editor-item');
+                deleteTemplateEditorItem(itemDiv);
+            });
+            div.querySelector('.move-item-up-btn').addEventListener('click', (e) => {
+                const itemDiv = e.target.closest('.template-editor-item');
+                moveTemplateEditorItem(itemDiv, 'up');
+            });
+            div.querySelector('.move-item-down-btn').addEventListener('click', (e) => {
+                const itemDiv = e.target.closest('.template-editor-item');
+                moveTemplateEditorItem(itemDiv, 'down');
+                updateMoveButtonStates(itemDiv.parentElement); // Update buttons after move
+            });
+
+            if (item.type === 'group') {
+                div.querySelector('.add-nested-element-btn').addEventListener('click', (e) => {
+                    const itemDiv = e.target.closest('.template-editor-item');
+                    const nestedContainer = itemDiv.querySelector('.nested-items-container');
+                    const selectedType = addElementTypeSelect.value; // Use the main selector for type
+                    addTemplateEditorItem(selectedType, nestedContainer); // Add to nested container
+                });
+            }
+            if (item.type === 'radio') {
+                div.querySelector('.add-radio-option-btn').addEventListener('click', (e) => {
+                    const itemDiv = e.target.closest('.template-editor-item');
+                    const optionsContainer = itemDiv.querySelector('.radio-options-container');
+                    addRadioOptionEditorElement(item.id, optionsContainer);
+                });
+            }
+
+            // Add input listeners to update temporary data
+            div.querySelectorAll('.item-input').forEach(input => {
+                input.addEventListener('input', (e) => {
+                    updateTemplateItemData(item.id, e.target.dataset.property, e.target.value);
+                });
+                input.addEventListener('change', (e) => { // For number inputs mainly
+                    updateTemplateItemData(item.id, e.target.dataset.property, e.target.value);
+                });
+            });
+
+            // Update move button states for the container this item is in
+            updateMoveButtonStates(div.parentElement);
+
+
+            return div;
+        }
+
+        /** Creates an editor element for a radio button option */
+        function createRadioOptionEditorElement(itemId, option, optionIndex) {
+            const optionDiv = document.createElement('div');
+            optionDiv.className = 'flex items-center space-x-2 radio-option-editor';
+            optionDiv.dataset.optionIndex = optionIndex;
+            optionDiv.innerHTML = `
+                <input type="text" value="${option || ''}" class="radio-option-input flex-grow px-2 py-1 border border-gray-300 rounded text-sm" placeholder="Optionswert">
+                <button type="button" class="delete-radio-option-btn text-red-500 hover:text-red-700" title="Option löschen"><span class="lucide text-xs">&#xea0f;</span></button>
+            `;
+            optionDiv.querySelector('.radio-option-input').addEventListener('input', (e) => {
+                updateRadioOptionData(itemId, optionIndex, e.target.value);
+            });
+            optionDiv.querySelector('.delete-radio-option-btn').addEventListener('click', (e) => {
+                const optDiv = e.target.closest('.radio-option-editor');
+                deleteRadioOptionEditorElement(itemId, optDiv);
+            });
+            return optionDiv;
+        }
+
+        /** Adds a new radio option element to the editor */
+        function addRadioOptionEditorElement(itemId, container) {
+            const newItem = findTemplateItemById(currentTemplateData.items, itemId);
+            if (!newItem || newItem.type !== 'radio') return;
+
+            if (!newItem.options) newItem.options = [];
+            const newOptionIndex = newItem.options.length;
+            newItem.options.push(`Option ${newOptionIndex + 1}`); // Add placeholder option data
+
+            const optionElement = createRadioOptionEditorElement(itemId, newItem.options[newOptionIndex], newOptionIndex);
+            container.appendChild(optionElement);
+        }
+
+        /** Deletes a radio option element from the editor */
+        function deleteRadioOptionEditorElement(itemId, optionDiv) {
+            const optionIndex = parseInt(optionDiv.dataset.optionIndex);
+            const item = findTemplateItemById(currentTemplateData.items, itemId);
+
+            if (item && item.options && optionIndex >= 0 && optionIndex < item.options.length) {
+                item.options.splice(optionIndex, 1); // Remove from data
+                optionDiv.remove(); // Remove from UI
+
+                // Re-index remaining options in the UI
+                const remainingOptionDivs = optionDiv.parentElement.querySelectorAll('.radio-option-editor');
+                remainingOptionDivs.forEach((div, index) => {
+                    div.dataset.optionIndex = index;
+                    // Update event listeners if necessary, though maybe not needed if data is updated correctly
+                });
+            }
+        }
+
+        /** Updates the temporary data for a radio option */
+        function updateRadioOptionData(itemId, optionIndex, value) {
+            const item = findTemplateItemById(currentTemplateData.items, itemId);
+            if (item && item.options && optionIndex >= 0 && optionIndex < item.options.length) {
+                item.options[optionIndex] = value;
+            }
+        }
+
+
+        /** Adds a new item element to the template editor */
+        function addTemplateEditorItem(type, targetContainer = templateItemsContainer) {
+            const newItem = {
+                id: generateUUID(),
+                type: type,
+                label: `Neues ${type.charAt(0).toUpperCase() + type.slice(1)}`, // Default label
+            };
+
+            // Initialize type-specific properties
+            if (type === 'group') newItem.items = [];
+            if (type === 'radio') newItem.options = ['Option 1', 'Option 2'];
+            if (type === 'table') {
+                newItem.rowsCount = 2;
+                newItem.colsCount = 2;
+                newItem.headers = [];
+            }
+
+            // Find the correct array to add the item to in the data structure
+            const parentItemDiv = targetContainer.closest('.template-editor-item');
+            let targetArray;
+            if (parentItemDiv) {
+                const parentItemId = parentItemDiv.dataset.itemId;
+                const parentItem = findTemplateItemById(currentTemplateData.items, parentItemId);
+                if (parentItem && parentItem.type === 'group') {
+                    targetArray = parentItem.items;
+                } else {
+                    console.error("Kann kein verschachteltes Element zu einem Nicht-Gruppen-Element hinzufügen.");
+                    return; // Should not happen with UI controls
+                }
+            } else {
+                targetArray = currentTemplateData.items; // Root level
+            }
+
+            if (!targetArray) {
+                console.error("Zielarray zum Hinzufügen nicht gefunden.");
+                return;
+            }
+
+            targetArray.push(newItem); // Add to data structure
+
+            // Render the new item in the UI
+            const level = parentItemDiv ? parseInt(parentItemDiv.style.marginLeft || '0') / 16 + 1 : 0; // Calculate level based on margin
+            const itemElement = createTemplateEditorItemElement(newItem, level, targetArray.length - 1);
+            targetContainer.appendChild(itemElement);
+
+            // Update move button states for the container
+            updateMoveButtonStates(targetContainer);
+        }
+
+        /** Deletes an item from the template editor UI and data */
+        function deleteTemplateEditorItem(itemDiv) {
+            const itemId = itemDiv.dataset.itemId;
+            const container = itemDiv.parentElement;
+
+            // Find and remove the item from the data structure recursively
+            function removeItem(items, id) {
+                for (let i = 0; i < items.length; i++) {
+                    if (items[i].id === id) {
+                        items.splice(i, 1); // Remove item
+                        return true; // Item found and removed
+                    }
+                    if (items[i].type === 'group' && items[i].items) {
+                        if (removeItem(items[i].items, id)) {
+                            return true; // Item found in nested group
+                        }
+                    }
+                }
+                return false; // Item not found in this branch
+            }
+
+            if (removeItem(currentTemplateData.items, itemId)) {
+                itemDiv.remove(); // Remove from UI
+                // Update move button states for the container
+                updateMoveButtonStates(container);
+            } else {
+                console.error("Element zum Löschen nicht in Daten gefunden:", itemId);
+            }
+        }
+
+        /** Moves an item up or down in the template editor UI and data */
+        function moveTemplateEditorItem(itemDiv, direction) {
+            const itemId = itemDiv.dataset.itemId;
+            const container = itemDiv.parentElement;
+            const itemsInContainer = Array.from(container.children);
+            const currentIndex = itemsInContainer.indexOf(itemDiv);
+
+            let targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+
+            // Boundary checks
+            if (targetIndex < 0 || targetIndex >= itemsInContainer.length) {
+                return; // Cannot move further
+            }
+
+            // Find the corresponding array in the data structure
+            const parentItemDiv = container.closest('.template-editor-item');
+            let targetArray;
+            if (parentItemDiv) {
+                const parentItemId = parentItemDiv.dataset.itemId;
+                const parentItem = findTemplateItemById(currentTemplateData.items, parentItemId);
+                targetArray = parentItem ? parentItem.items : null;
+            } else {
+                targetArray = currentTemplateData.items; // Root level
+            }
+
+            if (!targetArray) {
+                console.error("Konnte das Datenarray für die Verschiebung nicht finden.");
+                return;
+            }
+
+            // Find the actual index in the data array (might differ from UI if filtered/sorted later)
+            // For now, assume UI index matches data index within the current level
+            const dataIndex = targetArray.findIndex(item => item.id === itemId);
+            let dataTargetIndex = direction === 'up' ? dataIndex - 1 : dataIndex + 1;
+
+            if (dataIndex === -1 || dataTargetIndex < 0 || dataTargetIndex >= targetArray.length) {
+                console.error("Datenindizes für Verschiebung ungültig.");
+                return; // Index mismatch or out of bounds
+            }
+
+
+            // Swap in data array
+            [targetArray[dataIndex], targetArray[dataTargetIndex]] = [targetArray[dataTargetIndex], targetArray[dataIndex]];
+
+            // Swap in UI
+            if (direction === 'up') {
+                container.insertBefore(itemDiv, itemsInContainer[targetIndex]);
+            } else {
+                container.insertBefore(itemDiv, itemsInContainer[targetIndex + 1]);
+            }
+
+            // Update data-item-index attributes (optional but good practice)
+            Array.from(container.children).forEach((child, index) => {
+                if (child.classList.contains('template-editor-item')) {
+                    child.dataset.itemIndex = index;
+                }
+            });
+
+
+            // Update button states after move
+            updateMoveButtonStates(container);
+        }
+
+        /** Updates the enabled/disabled state of move buttons within a container */
+        function updateMoveButtonStates(container) {
+            if (!container) return;
+            const items = container.querySelectorAll(':scope > .template-editor-item'); // Direct children only
+            items.forEach((item, index) => {
+                const upBtn = item.querySelector('.move-item-up-btn');
+                const downBtn = item.querySelector('.move-item-down-btn');
+
+                if (upBtn) {
+                    upBtn.disabled = (index === 0);
+                    upBtn.classList.toggle('opacity-50', upBtn.disabled);
+                    upBtn.classList.toggle('cursor-not-allowed', upBtn.disabled);
+                }
+                if (downBtn) {
+                    downBtn.disabled = (index === items.length - 1);
+                    downBtn.classList.toggle('opacity-50', downBtn.disabled);
+                    downBtn.classList.toggle('cursor-not-allowed', downBtn.disabled);
+                }
+            });
+        }
+
+
+        /** Finds an item by ID within the nested template data structure */
+        function findTemplateItemById(items, id) {
+            for (const item of items) {
+                if (item.id === id) {
+                    return item;
+                }
+                if (item.type === 'group' && item.items) {
+                    const found = findTemplateItemById(item.items, id);
+                    if (found) return found;
+                }
+            }
+            return null;
+        }
+
+        /** Updates a property of an item in the temporary template data */
+        function updateTemplateItemData(itemId, property, value) {
+            const item = findTemplateItemById(currentTemplateData.items, itemId);
+            if (item) {
+                // Handle specific conversions if necessary
+                if (property === 'rowsCount' || property === 'colsCount') {
+                    item[property] = parseInt(value) || 1; // Ensure it's a number >= 1
+                } else if (property === 'headers') {
+                    item[property] = value.split(',').map(h => h.trim()).filter(h => h); // Split headers string into array
+                } else {
+                    item[property] = value;
+                }
+                // console.log("Updated item data:", item);
+            } else {
+                console.warn("Konnte Element zum Aktualisieren nicht finden:", itemId);
+            }
+        }
+
+
+        /** Handles saving the template (new or update) */
+        async function saveTemplate(event) {
+            event.preventDefault();
+            const templateId = templateIdInput.value;
+            const templateName = templateNameInput.value.trim();
+
+            if (!templateName) {
+                showMessage("Vorlagenname darf nicht leer sein.", 'warning');
+                templateNameInput.focus();
+                return;
+            }
+
+            // Ensure currentTemplateData exists and has items
+            if (!currentTemplateData || !currentTemplateData.items) {
+                console.error("Keine Vorlagendaten zum Speichern vorhanden.");
+                showMessage("Fehler: Keine Vorlagendaten zum Speichern.", 'error');
+                return;
+            }
+
+            const now = new Date();
+            const templateData = {
+                name: templateName,
+                items: currentTemplateData.items, // Use the potentially modified items
+                updatedAt: now,
+            };
+
+
+            try {
+                if (templateId) {
+                    // Update existing template
+                    templateData.id = parseInt(templateId);
+                    // Preserve createdAt if it exists from loading
+                    const existing = await db.templates.get(templateData.id);
+                    templateData.createdAt = existing.createdAt;
+                    await db.templates.put(templateData);
+                    showMessage(`Vorlage "${templateName}" erfolgreich aktualisiert.`, 'success');
+                } else {
+                    // Add new template
+                    templateData.createdAt = now;
+                    await db.templates.add(templateData);
+                    showMessage(`Vorlage "${templateName}" erfolgreich erstellt.`, 'success');
+                }
+                closeTemplateEditor();
+                loadTemplates(); // Refresh the list
+            } catch (error) {
+                console.error("Fehler beim Speichern der Vorlage:", error);
+                showMessage("Fehler beim Speichern der Vorlage.", 'error');
+            }
+        }
+
+        /** Handles deleting a template */
+        async function deleteTemplate(templateId) {
+            const id = parseInt(templateId);
+            const template = await db.templates.get(id); // Get name for confirmation
+            if (!template) {
+                showMessage("Vorlage nicht gefunden.", "error");
+                return;
+            }
+
+            showConfirmation(
+                'Vorlage löschen',
+                `Möchten Sie die Vorlage "${template.name}" wirklich löschen? Dies kann nicht rückgängig gemacht werden.`,
+                async () => {
+                    try {
+                        await db.templates.delete(id);
+                        showMessage(`Vorlage "${template.name}" gelöscht.`, 'success');
+                        loadTemplates(); // Refresh the list
+                    } catch (error) {
+                        console.error("Fehler beim Löschen der Vorlage:", error);
+                        showMessage("Fehler beim Löschen der Vorlage.", 'error');
+                    }
+                }
+            );
+        }
+
+        // --- Instance Management ---
+
+        /** Prompts the user for an instance name */
+        function promptInstanceName(templateId) {
+            instanceNameForm.reset();
+            instanceTemplateIdInput.value = templateId;
+            instanceNameModal.classList.remove('hidden');
+            instanceNameInput.focus();
+        }
+
+        /** Closes the instance name modal */
+        function closeInstanceNameModal() {
+            instanceNameModal.classList.add('hidden');
+        }
+
+        /** Creates a new instance from a template */
+        async function createInstance(event) {
+            event.preventDefault();
+            const templateId = parseInt(instanceTemplateIdInput.value);
+            const instanceName = instanceNameInput.value.trim();
+
+            if (!instanceName) {
+                showMessage("Instanzname darf nicht leer sein.", 'warning');
+                instanceNameInput.focus();
+                return;
+            }
+
+            try {
+                const template = await db.templates.get(templateId);
+                if (!template) {
+                    showMessage("Fehler: Vorlage nicht gefunden.", 'error');
+                    closeInstanceNameModal();
+                    return;
+                }
+
+                const now = new Date();
+                const newInstance = {
+                    name: instanceName,
+                    items: deepCopy(template.items || []), // Crucial: Deep copy to make independent
+                    createdAt: now,
+                    updatedAt: now,
+                };
+
+                // Initialize values for interactive elements if needed (e.g., set checkboxes to false)
+                initializeInstanceValues(newInstance.items);
+
+                // Add search terms
+                newInstance.searchTerms = createSearchTerms(newInstance);
+
+
+                const newId = await db.instances.add(newInstance);
+                showMessage(`Instanz "${instanceName}" erstellt.`, 'success');
+                closeInstanceNameModal();
+                loadInstances(); // Refresh instance list
+                // Optionally, open the new instance immediately
+                // openChecklist(newId);
+            } catch (error) {
+                console.error("Fehler beim Erstellen der Instanz:", error);
+                showMessage("Fehler beim Erstellen der Instanz.", 'error');
+                closeInstanceNameModal();
+            }
+        }
+
+        /** Initializes default values for instance items (e.g., unchecked checkboxes) */
+        function initializeInstanceValues(items) {
+            items.forEach(item => {
+                switch (item.type) {
+                    case 'checkbox':
+                        item.value = false;
+                        break;
+                    case 'text':
+                    case 'date':
+                    case 'image': // URL is part of template, value could be annotation?
+                    case 'link':  // URL is part of template
+                        item.value = ''; // Default empty value
+                        break;
+                    case 'radio':
+                        item.value = null; // No option selected initially
+                        break;
+                    case 'table':
+                        // Initialize table cells if needed, e.g., with empty strings
+                        item.value = Array(item.rowsCount || 0).fill(null).map(() => Array(item.colsCount || 0).fill(''));
+                        break;
+                    case 'group':
+                        if (item.items) {
+                            initializeInstanceValues(item.items);
+                        }
+                        break;
+                }
+            });
+        }
+
+
+        /** Loads and displays instances from DB */
+        async function loadInstances() {
+            try {
+                let query = db.instances;
+                const sortBy = currentSortInstances;
+                const searchTerm = currentSearchInstances.toLowerCase().trim();
+
+                // Apply filtering first
+                if (searchTerm) {
+                    // Dexie doesn't support OR across multiple fields easily with multiEntry indexes like this.
+                    // A simple approach is to filter after retrieving, or use a more complex where clause if possible.
+                    // Let's filter after retrieval for simplicity here.
+                    // query = query.where('searchTerms').startsWithIgnoreCase(searchTerm); // Might work for single term prefix
+                    // Alternative: Fetch more and filter in JS
+                    query = db.instances; // Fetch all matching sort order
+                } else {
+                    query = db.instances;
+                }
+
+
+                // Apply sorting
+                if (sortBy === 'name_asc') query = query.orderBy('name');
+                else if (sortBy === 'name_desc') query = query.orderBy('name').reverse();
+                else if (sortBy === 'date_newest') query = query.orderBy('updatedAt').reverse();
+                else if (sortBy === 'date_oldest') query = query.orderBy('updatedAt');
+
+                let instances = await query.toArray();
+
+                // Filter in JavaScript if search term exists
+                if (searchTerm) {
+                    instances = instances.filter(instance =>
+                        instance.searchTerms.some(term => term.includes(searchTerm))
+                    );
+                }
+
+
+                renderInstancesList(instances);
+            } catch (error) {
+                console.error("Fehler beim Laden der Instanzen:", error);
+                showMessage("Fehler beim Laden der Instanzen.", 'error');
+                instancesListContainer.innerHTML = '<p class="text-red-500">Fehler beim Laden der Instanzen.</p>';
+            }
+        }
+
+        /** Renders the list of instances in the UI */
+        function renderInstancesList(instances) {
+            instancesListContainer.innerHTML = ''; // Clear existing list
+            if (instances.length === 0) {
+                instancesListContainer.innerHTML = `<p class="text-gray-500">${currentSearchInstances ? 'Keine Instanzen entsprechen Ihrer Suche.' : 'Keine Instanzen gefunden. Erstellen Sie eine aus einer Vorlage!'}</p>`;
+                return;
+            }
+
+            instances.forEach(instance => {
+                const div = document.createElement('div');
+                div.className = 'flex justify-between items-center p-3 border-b border-gray-200 hover:bg-gray-50';
+                div.innerHTML = `
+                    <div>
+                        <span class="font-medium text-gray-800">${instance.name}</span>
+                        <p class="text-sm text-gray-500">Zuletzt geändert: ${formatDate(instance.updatedAt)}</p>
+                    </div>
+                    <div class="space-x-2 flex items-center">
+                         <button data-id="${instance.id}" class="open-instance-btn text-blue-500 hover:text-blue-700" title="Instanz öffnen/bearbeiten">
+                             <span class="lucide">&#xea11;</span> </button>
+                         <button data-id="${instance.id}" class="delete-instance-btn text-red-500 hover:text-red-700" title="Instanz löschen">
+                             <span class="lucide">&#xea54;</span> </button>
+                    </div>
+                `;
+                instancesListContainer.appendChild(div);
+            });
+
+            // Add event listeners for the new buttons
+            instancesListContainer.querySelectorAll('.open-instance-btn').forEach(btn => {
+                btn.addEventListener('click', () => openChecklist(btn.dataset.id));
+            });
+            instancesListContainer.querySelectorAll('.delete-instance-btn').forEach(btn => {
+                btn.addEventListener('click', () => deleteInstance(btn.dataset.id));
+            });
+        }
+
+        /** Handles deleting an instance */
+        async function deleteInstance(instanceId) {
+            const id = parseInt(instanceId);
+            const instance = await db.instances.get(id); // Get name for confirmation
+            if (!instance) {
+                showMessage("Instanz nicht gefunden.", "error");
+                return;
+            }
+
+            showConfirmation(
+                'Instanz löschen',
+                `Möchten Sie die Instanz "${instance.name}" wirklich löschen? Dies kann nicht rückgängig gemacht werden.`,
+                async () => {
+                    try {
+                        await db.instances.delete(id);
+                        showMessage(`Instanz "${instance.name}" gelöscht.`, 'success');
+                        loadInstances(); // Refresh the list
+                        // If the deleted instance was open, close the checklist tab
+                        if (currentInstanceData && currentInstanceData.id === id) {
+                            activateTab('instances'); // Switch back to instances tab
+                        }
+                    } catch (error) {
+                        console.error("Fehler beim Löschen der Instanz:", error);
+                        showMessage("Fehler beim Löschen der Instanz.", 'error');
+                    }
+                }
+            );
+        }
+
+        // --- Checklist View ---
+
+        /** Opens a specific instance in the checklist view */
+        async function openChecklist(instanceId) {
+            const id = parseInt(instanceId);
+            try {
+                const instance = await db.instances.get(id);
+                if (instance) {
+                    currentInstanceData = instance; // Store globally
+                    checklistTitle.textContent = `Checkliste: ${instance.name}`;
+                    renderChecklist(instance.items, checklistContentContainer);
+                    activateTab('checklist'); // Switch to the checklist tab
+                } else {
+                    showMessage("Instanz nicht gefunden.", 'error');
+                }
+            } catch (error) {
+                console.error("Fehler beim Öffnen der Instanz:", error);
+                showMessage("Fehler beim Öffnen der Instanz.", 'error');
+            }
+        }
+
+        /** Renders the checklist items recursively */
+        function renderChecklist(items, container, level = 0) {
+            container.innerHTML = ''; // Clear previous content
+
+            items.forEach(item => {
+                const element = createChecklistItemElement(item, level);
+                container.appendChild(element);
+
+                if (item.type === 'group' && item.items) {
+                    const nestedContainer = element.querySelector('.nested-checklist-items');
+                    if (nestedContainer) {
+                        renderChecklist(item.items, nestedContainer, level + 1);
+                    }
+                }
+            });
+        }
+
+        /** Creates a single element for the checklist view based on item type */
+        function createChecklistItemElement(item, level) {
+            const div = document.createElement('div');
+            div.className = `checklist-item mb-3 ml-${level * 6}`; // Indentation for checklist view
+            div.dataset.itemId = item.id; // Use the item's unique ID
+
+            let content = '';
+
+            switch (item.type) {
+                case 'group':
+                    content = `
+                        <h3 class="text-lg font-semibold text-blue-800 border-b border-blue-200 pb-1 mb-2">${item.label}</h3>
+                        <div class="nested-checklist-items space-y-3"></div>
+                    `;
+                    break;
+                case 'checkbox':
+                    content = `
+                        <label for="item-${item.id}" class="flex items-center cursor-pointer">
+                            <input type="checkbox" id="item-${item.id}" data-property="value" ${item.value ? 'checked' : ''} class="mr-3 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 checklist-input">
+                            <span class="text-gray-700">${item.label}</span>
+                        </label>
+                    `;
+                    break;
+                case 'text':
+                    content = `
+                        <label for="item-${item.id}" class="block text-sm font-medium text-gray-700 mb-1">${item.label}</label>
+                        <input type="text" id="item-${item.id}" data-property="value" value="${item.value || ''}" placeholder="${item.placeholder || ''}" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 checklist-input">
+                    `;
+                    break;
+                case 'radio':
+                    content = `<fieldset class="mb-2">
+                                <legend class="block text-sm font-medium text-gray-700 mb-1">${item.label}</legend>
+                                <div class="space-y-1 mt-1">`;
+                    (item.options || []).forEach((option, index) => {
+                        const optionId = `item-${item.id}-option-${index}`;
+                        content += `
+                            <label for="${optionId}" class="flex items-center cursor-pointer">
+                                <input type="radio" id="${optionId}" name="radio-group-${item.id}" data-property="value" value="${option}" ${item.value === option ? 'checked' : ''} class="mr-2 h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500 checklist-input">
+                                <span class="text-gray-700">${option}</span>
+                            </label>`;
+                    });
+                    content += `</div></fieldset>`;
+                    break;
+                case 'table':
+                    content = `<div class="mb-2 overflow-x-auto">
+                                 <label class="block text-sm font-medium text-gray-700 mb-1">${item.label}</label>
+                                 <table class="min-w-full border border-collapse border-gray-300">
+                                     <thead><tr>`;
+                    (item.headers || Array(item.colsCount || 0).fill('')).forEach(header => {
+                        content += `<th class="border border-gray-300 px-2 py-1 bg-gray-100 text-left text-sm font-medium text-gray-600">${header}</th>`;
+                    });
+                    content += `</tr></thead><tbody>`;
+                    for (let r = 0; r < (item.rowsCount || 0); r++) {
+                        content += `<tr>`;
+                        for (let c = 0; c < (item.colsCount || 0); c++) {
+                            const cellValue = (item.value && item.value[r] && item.value[r][c] !== undefined) ? item.value[r][c] : '';
+                            content += `<td class="border border-gray-300 px-1 py-0">
+                                             <input type="text" value="${cellValue}" data-row="${r}" data-col="${c}" class="w-full border-none focus:ring-0 focus:outline-none p-1 text-sm checklist-input table-cell-input">
+                                         </td>`;
+                        }
+                        content += `</tr>`;
+                    }
+                    content += `</tbody></table></div>`;
+                    break;
+                case 'image':
+                    content = `<div class="mb-2">
+                                 <label class="block text-sm font-medium text-gray-700 mb-1">${item.label}</label>
+                                 ${item.url ? `<img src="${item.url}" alt="${item.label || 'Bild'}" class="max-w-xs max-h-48 my-1 rounded border border-gray-200" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden')">
+                                              <p class="text-red-500 text-sm hidden">Bild konnte nicht geladen werden.</p>` : '<p class="text-sm text-gray-500">Keine Bild-URL angegeben.</p>'}
+                                 <input type="text" data-property="value" value="${item.value || ''}" placeholder="Anmerkung (optional)" class="mt-1 w-full px-2 py-1 border border-gray-300 rounded text-sm checklist-input">
+                               </div>`;
+                    break;
+                case 'link':
+                    content = `<div class="mb-2">
+                                 <label class="block text-sm font-medium text-gray-700 mb-1">${item.label}</label>
+                                 ${item.url ? `<a href="${item.url}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline break-all">${item.url}</a>` : '<p class="text-sm text-gray-500">Keine Link-URL angegeben.</p>'}
+                                  <input type="text" data-property="value" value="${item.value || ''}" placeholder="Anmerkung (optional)" class="mt-1 w-full px-2 py-1 border border-gray-300 rounded text-sm checklist-input">
+                             </div>`;
+                    break;
+                case 'date':
+                    content = `
+                        <label for="item-${item.id}" class="block text-sm font-medium text-gray-700 mb-1">${item.label}</label>
+                        <input type="date" id="item-${item.id}" data-property="value" value="${item.value || ''}" class="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 checklist-input">
+                    `;
+                    break;
+                default:
+                    content = `<p class="text-red-500">Unbekannter Elementtyp: ${item.type}</p>`;
+            }
+
+            div.innerHTML = content;
+
+            // Add event listeners to update currentInstanceData on input change
+            div.querySelectorAll('.checklist-input').forEach(input => {
+                input.addEventListener('change', (e) => handleChecklistInputChange(e.target, item.id)); // Use 'change' for most inputs
+                if (input.type === 'text' || input.classList.contains('table-cell-input')) {
+                    input.addEventListener('input', (e) => handleChecklistInputChange(e.target, item.id)); // Use 'input' for immediate feedback on text/table cells
+                }
+            });
+
+            return div;
+        }
+
+        /** Handles changes in checklist input fields and updates currentInstanceData */
+        function handleChecklistInputChange(inputElement, itemId) {
+            if (!currentInstanceData) return;
+
+            const item = findTemplateItemById(currentInstanceData.items, itemId); // Find item in instance data
+            if (!item) {
+                console.warn("Checklisten-Element in Daten nicht gefunden:", itemId);
+                return;
+            }
+
+            const property = inputElement.dataset.property; // Should be 'value' for most
+            let value;
+
+            if (inputElement.type === 'checkbox') {
+                value = inputElement.checked;
+            } else if (inputElement.type === 'radio') {
+                // Only update if this radio button is checked
+                if (inputElement.checked) {
+                    value = inputElement.value;
+                } else {
+                    // If a radio button is unchecked, it means another in the group was checked.
+                    // The 'change' event on the *checked* one handles the update.
+                    // We don't need to do anything here for the unchecked one.
+                    return;
+                }
+            } else if (inputElement.classList.contains('table-cell-input')) {
+                const row = parseInt(inputElement.dataset.row);
+                const col = parseInt(inputElement.dataset.col);
+                if (!item.value || !Array.isArray(item.value)) { // Initialize table value array if needed
+                    item.value = Array(item.rowsCount || 0).fill(null).map(() => Array(item.colsCount || 0).fill(''));
+                }
+                if (item.value[row]) {
+                    item.value[row][col] = inputElement.value;
+                    // No need to assign 'value' directly, we modified the array element
+                }
+                // console.log(`Updated table cell [${row}, ${col}]:`, inputElement.value);
+                // Mark instance as updated immediately for table input
+                currentInstanceData.updatedAt = new Date();
+                currentInstanceData.searchTerms = createSearchTerms(currentInstanceData); // Update search terms too
+                return; // Skip the generic value assignment below
+            }
+            else {
+                value = inputElement.value;
+            }
+
+            if (property) {
+                item[property] = value;
+                // Mark instance as updated
+                currentInstanceData.updatedAt = new Date();
+                currentInstanceData.searchTerms = createSearchTerms(currentInstanceData); // Update search terms too
+                // console.log("Updated instance data item:", item);
+            }
+        }
+
+
+        /** Saves the currently open checklist instance */
+        async function saveChecklist() {
+            if (!currentInstanceData) {
+                showMessage("Keine Checkliste zum Speichern geöffnet.", 'warning');
+                return;
+            }
+
+            try {
+                // Ensure updatedAt and searchTerms are current (might have changed via input handlers)
+                currentInstanceData.updatedAt = new Date();
+                currentInstanceData.searchTerms = createSearchTerms(currentInstanceData);
+
+                await db.instances.put(currentInstanceData);
+                showMessage(`Instanz "${currentInstanceData.name}" gespeichert.`, 'success');
+                loadInstances(); // Refresh the list in the background
+            } catch (error) {
+                console.error("Fehler beim Speichern der Checkliste:", error);
+                showMessage("Fehler beim Speichern der Checkliste.", 'error');
+            }
+        }
+
+        /** Prints the currently open checklist instance */
+        function printChecklist() {
+            if (!currentInstanceData) {
+                showMessage("Keine Checkliste zum Drucken geöffnet.", 'warning');
+                return;
+            }
+
+            // Create a printable version of the checklist content
+            printArea.innerHTML = ''; // Clear previous print content
+            const printContainer = document.createElement('div');
+            printContainer.className = 'p-4'; // Add some padding for print
+
+            // Add title
+            const titleElement = document.createElement('h2');
+            titleElement.textContent = `Checkliste: ${currentInstanceData.name}`;
+            titleElement.className = 'text-xl font-bold mb-4 text-black';
+            printContainer.appendChild(titleElement);
+
+            // Add generated date/time
+            const dateElement = document.createElement('p');
+            dateElement.textContent = `Gedruckt am: ${formatDate(new Date())}`;
+            dateElement.className = 'text-sm mb-6 text-gray-700';
+            printContainer.appendChild(dateElement);
+
+
+            // Render items specifically for printing (read-only view)
+            renderChecklistForPrint(currentInstanceData.items, printContainer);
+
+            printArea.appendChild(printContainer);
+            printArea.classList.remove('hidden'); // Make it visible for printing logic
+
+            window.print(); // Trigger browser print dialog
+
+            // Hide the print area again after printing (or potential cancellation)
+            // Use a small timeout to ensure print dialog has time to process
+            setTimeout(() => {
+                printArea.classList.add('hidden');
+                printArea.innerHTML = ''; // Clear content after printing
+            }, 500);
+        }
+
+        /** Renders checklist items recursively for printing */
+        function renderChecklistForPrint(items, container, level = 0) {
+            items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = `mb-3 ml-${level * 4}`; // Indentation for print
+
+                let content = '';
+                const label = item.label ? `<strong class="font-semibold">${item.label}:</strong> ` : '';
+
+                switch (item.type) {
+                    case 'group':
+                        content = `<h3 class="text-lg font-semibold text-blue-800 border-b border-gray-300 pb-1 mb-2 mt-3">${item.label}</h3>`;
+                        div.innerHTML = content; // Set group header first
+                        if (item.items) {
+                            const nestedContainer = document.createElement('div');
+                            nestedContainer.className = 'space-y-2';
+                            renderChecklistForPrint(item.items, nestedContainer, level + 1);
+                            div.appendChild(nestedContainer); // Append nested items
+                        }
+                        break; // Skip default content append for group
+
+                    case 'checkbox':
+                        content = `<div class="flex items-center">
+                                     <span class="inline-block w-4 h-4 border border-black mr-2 align-middle">${item.value ? '&#x2714;' : '&nbsp;'}</span> <span>${item.label}</span>
+                                   </div>`;
+                        break;
+                    case 'text':
+                        content = `<div>${label}${item.value || '<span class="text-gray-500 italic">Nicht ausgefüllt</span>'}</div>`;
+                        break;
+                    case 'radio':
+                        content = `<div>${label}`;
+                        if (item.value) {
+                            content += item.value;
+                        } else {
+                            content += '<span class="text-gray-500 italic">Keine Auswahl</span>';
+                        }
+                        // Optionally list all options:
+                        // content += ` (Optionen: ${(item.options || []).join(', ')})`;
+                        content += `</div>`;
+                        break;
+                    case 'table':
+                        content = `<div class="mt-1 mb-2">
+                                     <strong class="font-semibold block mb-1">${item.label}</strong>
+                                     <table class="min-w-full border border-collapse border-gray-400 text-sm">
+                                         <thead><tr>`;
+                        (item.headers || Array(item.colsCount || 0).fill('')).forEach(header => {
+                            content += `<th class="border border-gray-400 px-2 py-1 bg-gray-200 text-left font-medium">${header}</th>`;
+                        });
+                        content += `</tr></thead><tbody>`;
+                        for (let r = 0; r < (item.rowsCount || 0); r++) {
+                            content += `<tr>`;
+                            for (let c = 0; c < (item.colsCount || 0); c++) {
+                                const cellValue = (item.value && item.value[r] && item.value[r][c] !== undefined) ? item.value[r][c] : '';
+                                content += `<td class="border border-gray-400 px-2 py-1">${cellValue || '&nbsp;'}</td>`;
+                            }
+                            content += `</tr>`;
+                        }
+                        content += `</tbody></table></div>`;
+                        break;
+                    case 'image':
+                        content = `<div>${label} ${item.url ? `<img src="${item.url}" alt="${item.label || 'Bild'}" style="max-width: 150px; max-height: 150px; vertical-align: middle; margin: 5px 0; border: 1px solid #ccc;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';"><span style='display:none; color: red; font-size: 0.8em;'> (Bild nicht geladen)</span>` : '(Keine URL)'}`;
+                        if (item.value) content += `<br><span class="text-sm italic ml-2">Anmerkung: ${item.value}</span>`
+                        content += `</div>`;
+                        break;
+                    case 'link':
+                        content = `<div>${label} ${item.url ? `<span class="text-blue-700">${item.url}</span>` : '(Keine URL)'}`;
+                        if (item.value) content += `<br><span class="text-sm italic ml-2">Anmerkung: ${item.value}</span>`
+                        content += `</div>`;
+                        break;
+                    case 'date':
+                        content = `<div>${label}${item.value ? new Date(item.value).toLocaleDateString('de-DE') : '<span class="text-gray-500 italic">Kein Datum</span>'}</div>`;
+                        break;
+                    default:
+                        content = `<p style="color: red;">Unbekannter Typ: ${item.type}</p>`;
+                }
+
+                if (item.type !== 'group') { // Append content for non-group items
+                    div.innerHTML = content;
+                }
+                container.appendChild(div);
+
+            });
+        }
+
+
+        // --- Sorting and Searching ---
+        sortTemplatesSelect.addEventListener('change', (e) => {
+            currentSortTemplates = e.target.value;
+            loadTemplates();
+        });
+
+        sortInstancesSelect.addEventListener('change', (e) => {
+            currentSortInstances = e.target.value;
+            loadInstances();
+        });
+
+        let searchDebounceTimer;
+        searchInstancesInput.addEventListener('input', (e) => {
+            clearTimeout(searchDebounceTimer);
+            searchDebounceTimer = setTimeout(() => {
+                currentSearchInstances = e.target.value;
+                loadInstances();
+            }, 300); // Debounce search input
+        });
+
+        // --- Import / Export ---
+
+        function openImportExportModal(type, mode) { // type: 'templates' or 'instances', mode: 'import' or 'export'
+            importExportModal.classList.remove('hidden');
+            confirmImportExportBtn.classList.add('hidden'); // Hide confirm button initially
+            importExportContent.innerHTML = '<p class="text-center p-4">Lade Daten...</p>'; // Loading indicator
+
+            importExportTitle.textContent = `${mode === 'import' ? 'Importieren' : 'Exportieren'} von ${type === 'templates' ? 'Vorlagen' : 'Instanzen'}`;
+
+            // Store context for the confirm button
+            confirmImportExportBtn.dataset.type = type;
+            confirmImportExportBtn.dataset.mode = mode;
+
+            if (mode === 'export') {
+                setupExportUI(type);
+            } else {
+                setupImportUI(type);
+            }
+        }
+
+        function closeImportExportModal() {
+            importExportModal.classList.add('hidden');
+            importExportContent.innerHTML = ''; // Clear content
+            // Clear file input if it exists
+            const fileInput = document.getElementById('import-file-input');
+            if (fileInput) fileInput.value = '';
+        }
+
+        async function setupExportUI(type) {
+            const dataTable = type === 'templates' ? db.templates : db.instances;
+            try {
+                const items = await dataTable.orderBy('name').toArray();
+                if (items.length === 0) {
+                    importExportContent.innerHTML = `<p class="text-gray-600">Keine ${type === 'templates' ? 'Vorlagen' : 'Instanzen'} zum Exportieren vorhanden.</p>`;
+                    return;
+                }
+
+                let checkboxesHTML = `<p class="mb-2 font-medium">Wählen Sie die zu exportierenden ${type === 'templates' ? 'Vorlagen' : 'Instanzen'} aus:</p>
+                                      <div class="max-h-60 overflow-y-auto border rounded p-2 mb-3 space-y-1">
+                                        <label class="flex items-center space-x-2 p-1 hover:bg-gray-100 rounded cursor-pointer">
+                                            <input type="checkbox" id="select-all-export" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                            <strong>Alle auswählen/abwählen</strong>
+                                        </label>`;
+                items.forEach(item => {
+                    checkboxesHTML += `
+                        <label class="flex items-center space-x-2 p-1 hover:bg-gray-100 rounded cursor-pointer">
+                            <input type="checkbox" name="export-item" value="${item.id}" class="export-item-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            <span>${item.name} <span class="text-xs text-gray-500">(${formatDate(item.updatedAt)})</span></span>
+                        </label>
+                    `;
+                });
+                checkboxesHTML += `</div>`;
+                importExportContent.innerHTML = checkboxesHTML;
+
+                confirmImportExportBtn.textContent = `${type === 'templates' ? 'Vorlagen' : 'Instanzen'} exportieren`;
+                confirmImportExportBtn.classList.remove('hidden'); // Show export button
+
+                // Select All logic
+                const selectAll = document.getElementById('select-all-export');
+                const itemCheckboxes = importExportContent.querySelectorAll('.export-item-checkbox');
+                selectAll.addEventListener('change', () => {
+                    itemCheckboxes.forEach(cb => cb.checked = selectAll.checked);
+                });
+                itemCheckboxes.forEach(cb => {
+                    cb.addEventListener('change', () => {
+                        selectAll.checked = Array.from(itemCheckboxes).every(c => c.checked);
+                    });
+                });
+
+
+            } catch (error) {
+                console.error(`Fehler beim Laden der ${type} für den Export:`, error);
+                importExportContent.innerHTML = `<p class="text-red-500">Fehler beim Laden der Daten für den Export.</p>`;
+                showMessage(`Fehler beim Laden der ${type} für den Export.`, 'error');
+            }
+        }
+
+        function setupImportUI(type) {
+            importExportContent.innerHTML = `
+                <div class="mb-4">
+                    <label for="import-file-input" class="block text-sm font-medium text-gray-700 mb-1">Wählen Sie eine JSON-Datei zum Importieren:</label>
+                    <input type="file" id="import-file-input" accept=".json" required class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Importmodus:</label>
+                    <div class="flex items-center space-x-4">
+                         <label class="flex items-center">
+                            <input type="radio" name="import-mode" value="append" checked class="mr-1 rounded-full border-gray-300 text-blue-600 focus:ring-blue-500">
+                            <span>Anhängen (neue hinzufügen, bestehende ignorieren)</span>
+                         </label>
+                         <label class="flex items-center">
+                            <input type="radio" name="import-mode" value="overwrite" class="mr-1 rounded-full border-gray-300 text-blue-600 focus:ring-blue-500">
+                            <span class="text-red-600">Überschreiben (alle vorhandenen ${type === 'templates' ? 'Vorlagen' : 'Instanzen'} löschen!)</span>
+                         </label>
+                    </div>
+                </div>
+                <div id="import-preview" class="mt-4 max-h-40 overflow-y-auto border rounded p-2 bg-gray-50 hidden">
+                     <p class="font-medium text-sm mb-1">Gefundene Elemente in der Datei:</p>
+                     <ul id="import-item-list" class="list-disc list-inside text-sm"></ul>
+                </div>
+            `;
+
+            confirmImportExportBtn.textContent = `${type === 'templates' ? 'Vorlagen' : 'Instanzen'} importieren`;
+            // Button remains hidden until a file is selected and valid
+
+            const fileInput = document.getElementById('import-file-input');
+            fileInput.addEventListener('change', handleImportFileSelect);
+        }
+
+        function handleImportFileSelect(event) {
+            const file = event.target.files[0];
+            const previewArea = document.getElementById('import-preview');
+            const itemList = document.getElementById('import-item-list');
+            confirmImportExportBtn.classList.add('hidden'); // Hide button until validation passes
+            previewArea.classList.add('hidden');
+            itemList.innerHTML = '';
+
+
+            if (!file) return;
+
+            if (!file.name.toLowerCase().endsWith('.json')) {
+                showMessage("Bitte wählen Sie eine gültige .json-Datei.", 'warning');
+                event.target.value = ''; // Reset file input
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    const type = confirmImportExportBtn.dataset.type; // 'templates' or 'instances'
+
+                    // Basic validation: Check if it's an array and has expected structure (e.g., name)
+                    if (!Array.isArray(data) || data.length === 0 || !data[0].name) {
+                        throw new Error("Ungültiges oder leeres Datenformat in der JSON-Datei.");
+                    }
+
+                    // Check if the structure matches the expected type (simple check)
+                    const expectedKey = (type === 'templates') ? 'items' : 'items'; // Could add more specific checks
+                    if (data[0][expectedKey] === undefined) {
+                        throw new Error(`Die JSON-Datei scheint keine ${type} zu enthalten.`);
+                    }
+
+
+                    // Show preview
+                    previewArea.classList.remove('hidden');
+                    data.forEach(item => {
+                        const li = document.createElement('li');
+                        li.textContent = item.name || 'Unbenanntes Element';
+                        itemList.appendChild(li);
+                    });
+
+                    confirmImportExportBtn.classList.remove('hidden'); // Show import button now
+
+                } catch (error) {
+                    console.error("Fehler beim Lesen oder Parsen der Importdatei:", error);
+                    showMessage(`Fehler beim Verarbeiten der Datei: ${error.message}`, 'error');
+                    event.target.value = ''; // Reset file input
+                    previewArea.classList.add('hidden');
+                    itemList.innerHTML = '';
+                }
+            };
+            reader.onerror = () => {
+                showMessage("Fehler beim Lesen der Datei.", 'error');
+                event.target.value = ''; // Reset file input
+                previewArea.classList.add('hidden');
+                itemList.innerHTML = '';
+            };
+            reader.readAsText(file);
+        }
+
+
+        async function handleConfirmImportExport() {
+            const type = confirmImportExportBtn.dataset.type;
+            const mode = confirmImportExportBtn.dataset.mode;
+
+            if (mode === 'export') {
+                await executeExport(type);
+            } else {
+                await executeImport(type);
+            }
+        }
+
+        async function executeExport(type) {
+            const selectedCheckboxes = importExportContent.querySelectorAll('.export-item-checkbox:checked');
+            if (selectedCheckboxes.length === 0) {
+                showMessage("Bitte wählen Sie mindestens ein Element zum Exportieren aus.", 'warning');
+                return;
+            }
+
+            const idsToExport = Array.from(selectedCheckboxes).map(cb => parseInt(cb.value));
+            const dataTable = type === 'templates' ? db.templates : db.instances;
+
+            try {
+                const itemsToExport = await dataTable.bulkGet(idsToExport);
+                // Clean data for export (remove internal IDs like Dexie's primary key if desired, though often kept)
+                const exportData = itemsToExport.map(item => {
+                    const { id, ...rest } = item; // Exclude the auto-incrementing ID
+                    // Optionally remove searchTerms from instance export
+                    if (type === 'instances') {
+                        delete rest.searchTerms;
+                    }
+                    return rest;
+                });
+
+                const jsonString = JSON.stringify(exportData, null, 2); // Pretty print JSON
+                const blob = new Blob([jsonString], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${type}_export_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                showMessage(`${selectedCheckboxes.length} ${type === 'templates' ? 'Vorlage(n)' : 'Instanz(en)'} exportiert.`, 'success');
+                closeImportExportModal();
+
+            } catch (error) {
+                console.error(`Fehler beim Exportieren der ${type}:`, error);
+                showMessage(`Fehler beim Exportieren der ${type}.`, 'error');
+            }
+        }
+
+        async function executeImport(type) {
+            const fileInput = document.getElementById('import-file-input');
+            const importMode = document.querySelector('input[name="import-mode"]:checked').value;
+            const file = fileInput.files[0];
+
+            if (!file) {
+                showMessage("Keine Datei zum Importieren ausgewählt.", 'warning');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const dataToImport = JSON.parse(e.target.result);
+                    const dataTable = type === 'templates' ? db.templates : db.instances;
+                    const now = new Date();
+
+                    // Prepare data (add timestamps, searchTerms if needed)
+                    const preparedData = dataToImport.map(item => {
+                        item.createdAt = now; // Set import time as creation time
+                        item.updatedAt = now;
+                        if (type === 'instances') {
+                            item.searchTerms = createSearchTerms(item);
+                        }
+                        // Ensure items array exists, even if empty
+                        if (!item.items) item.items = [];
+                        return item;
+                    });
+
+                    if (importMode === 'overwrite') {
+                        showConfirmation(
+                            'Überschreiben bestätigen',
+                            `Möchten Sie wirklich ALLE vorhandenen ${type === 'templates' ? 'Vorlagen' : 'Instanzen'} löschen und durch die importierten ersetzen? Dies kann nicht rückgängig gemacht werden!`,
+                            async () => {
+                                try {
+                                    await dataTable.clear(); // Delete all existing items
+                                    await dataTable.bulkAdd(preparedData);
+                                    showMessage(`${preparedData.length} ${type === 'templates' ? 'Vorlage(n)' : 'Instanz(en)'} importiert (Überschreiben).`, 'success');
+                                    closeImportExportModal();
+                                    if (type === 'templates') loadTemplates(); else loadInstances();
+                                } catch (error) {
+                                    console.error(`Fehler beim Überschreiben der ${type}:`, error);
+                                    showMessage(`Fehler beim Überschreiben der ${type}.`, 'error');
+                                }
+                            }
+                        );
+                    } else { // Append mode
+                        // In append mode, we just add the new items. Dexie handles potential ID conflicts if we used '++id'.
+                        // If we were using non-auto-incrementing IDs from the import file, we'd need conflict handling.
+                        await dataTable.bulkAdd(preparedData);
+                        showMessage(`${preparedData.length} ${type === 'templates' ? 'Vorlage(n)' : 'Instanz(en)'} importiert (Anhängen).`, 'success');
+                        closeImportExportModal();
+                        if (type === 'templates') loadTemplates(); else loadInstances();
+                    }
+
+                } catch (error) {
+                    console.error(`Fehler beim Importieren der ${type}:`, error);
+                    showMessage(`Fehler beim Importieren der ${type}: ${error.message}`, 'error');
+                }
+            };
+            reader.onerror = () => {
+                showMessage("Fehler beim Lesen der Importdatei.", 'error');
+            };
+            reader.readAsText(file);
+        }
+
+
+        // --- Event Listeners ---
+        addTemplateBtn.addEventListener('click', () => openTemplateEditor());
+        closeTemplateModalBtn.addEventListener('click', closeTemplateEditor);
+        cancelTemplateEditBtn.addEventListener('click', closeTemplateEditor);
+        templateForm.addEventListener('submit', saveTemplate);
+        addElementBtn.addEventListener('click', () => {
+            const selectedType = addElementTypeSelect.value;
+            addTemplateEditorItem(selectedType); // Add to root container by default
+        });
+
+        closeInstanceNameModalBtn.addEventListener('click', closeInstanceNameModal);
+        cancelInstanceCreationBtn.addEventListener('click', closeInstanceNameModal);
+        instanceNameForm.addEventListener('submit', createInstance);
+
+        saveChecklistBtn.addEventListener('click', saveChecklist);
+        closeChecklistBtn.addEventListener('click', () => activateTab('instances')); // Go back to instances list
+        printChecklistBtn.addEventListener('click', printChecklist);
+
+        importTemplatesBtn.addEventListener('click', () => openImportExportModal('templates', 'import'));
+        exportTemplatesBtn.addEventListener('click', () => openImportExportModal('templates', 'export'));
+        importInstancesBtn.addEventListener('click', () => openImportExportModal('instances', 'import'));
+        exportInstancesBtn.addEventListener('click', () => openImportExportModal('instances', 'export'));
+        closeImportExportModalBtn.addEventListener('click', closeImportExportModal);
+        cancelImportExportBtn.addEventListener('click', closeImportExportModal);
+        confirmImportExportBtn.addEventListener('click', handleConfirmImportExport);
+
+        closeMessageBoxBtn.addEventListener('click', hideMessage);
+
+
+        // --- Initial Load ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTemplates();
+            loadInstances();
+            activateTab('templates'); // Start on templates tab
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+        });
+
+    </script>
+
+</body>
+
+</html>
